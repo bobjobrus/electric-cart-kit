@@ -1,0 +1,1019 @@
+{
+ "date": "2026-11-10",
+ "note": "Плановая корзина по московским ценам ноября 2026 г. Фактические расходы на прототип могут отличаться. В корзине заложен новый аккумулятор VBS. Его стоимость отделена от комплектного аккумулятора донора. Карточки и наличие перед покупкой следует проверить.",
+ "groups": [
+  {
+   "id": "cart",
+   "name": "Тележка",
+   "budget": false
+  },
+  {
+   "id": "drive",
+   "name": "Моторы и плата"
+  },
+  {
+   "id": "power",
+   "name": "Съёмная батарея и её ящик"
+  },
+  {
+   "id": "box",
+   "name": "Коробка платы, кабели, защита от воды"
+  },
+  {
+   "id": "handle",
+   "name": "Ручка и пульт"
+  },
+  {
+   "id": "flash",
+   "name": "Прошивка"
+  },
+  {
+   "id": "axle",
+   "name": "Задний мост: металл, крепёж, антикор"
+  },
+  {
+   "id": "tools",
+   "name": "Инструмент"
+  }
+ ],
+ "items": [
+  {
+   "id": "cart",
+   "group": "cart",
+   "name": "Тележка HAITEC HT-GW350",
+   "spec": "куплена 04.11; ось колеса Ø15,6 мм, колея 390 мм",
+   "qty": 1,
+   "price": 12694,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/telezhka-ruchnaya-sadovaya-haitec-ht-gw350-350-kg-90670247/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "donor",
+   "group": "drive",
+   "name": "Б/у гироскутер 10″ 36 В с Авито — донор (куплен 6.11)",
+   "spec": "Два мотор-колеса, штатные прижимы, рама и плата YIYUN YK99. Для другого донора требуется сверка аппаратной ревизии.",
+   "qty": 1,
+   "price": 2500,
+   "shop": "Авито, Москва",
+   "url": "https://www.avito.ru/moskva?q=%D0%B3%D0%B8%D1%80%D0%BE%D1%81%D0%BA%D1%83%D1%82%D0%B5%D1%80+10.5",
+   "conf": "оценка",
+   "stage": "main"
+  },
+  {
+   "id": "board",
+   "group": "drive",
+   "name": "Плата TaoTao G2 на STM32F103RCT6 — только если родная плата гироскутера не заведётся",
+   "spec": "одна общая на оба мотора; на фото читается STM32F103 RCT6, 64 ножки. «Купить с доставкой», в пункте выдачи проверить надпись, 16 ножек на сторону, конденсаторы; у продавца спросить 5 проводов в разъёмах датчиков. 1 500 ₽ + доставка 37 ₽",
+   "qty": 1,
+   "price": 1537,
+   "shop": "Авито, объявление 8498977980",
+   "url": "https://www.avito.ru/moskva/sport_i_otdyh/plata_dlya_giroskutera_stm32f103_8498977980",
+   "conf": "карточка",
+   "stage": "alt"
+  },
+  {
+   "id": "jst4",
+   "group": "drive",
+   "name": "Кабель JST-XH 2,54 на 4 контакта, 4 провода по 30 см, 2 шт.",
+   "spec": "Для другого донора сверить шаг и назначение контактов. На экземпляре YK99 использован штатный хвост.",
+   "qty": 2,
+   "price": 88,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/razyom-jst-xh2.54-s-provodami-4-pin-perehodnik-razem-xh-4-9001322238",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "battery",
+   "group": "power",
+   "name": "Батарея VBS 36 В 8 А·ч в сумке + зарядка 42 В 2 А",
+   "spec": "съёмная, ≈2,5 кг; разряд до −20 °C, заряд только 0…+45 °C; разъём XT60. Вариант 10,4 А·ч — 22 284 ₽, в потолок не входит",
+   "qty": 1,
+   "price": 12078,
+   "shop": "ВольтБайкс, 2-я Магистральная, 14А с2",
+   "url": "https://www.voltbikes.ru/shop/electrovelosiped/akkumulyatory-dlya-elektrovelosipedov/litievyj-akkumulyator-vbs-36v-ot-8ach-v-treugolnoj-sumke-na-ramu-s-zu/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "batbox",
+   "group": "power",
+   "name": "Ящик TDM «ТЕХНИК-16» 41×21×18 на металлических замках",
+   "spec": "отсек батареи в кузове: открыл замки — вынул сумку",
+   "qty": 1,
+   "price": 1140,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/sq1032-0201-yaschik-dlya-instrumentov-tdm-electric-8007820915",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "foam",
+   "group": "power",
+   "name": "Коврик-пенка Outventure",
+   "spec": "2 слоя внутри ящика батареи; толщину проверить в магазине — нужно 10–12 мм",
+   "qty": 1,
+   "price": 599,
+   "shop": "Спортмастер",
+   "url": "https://www.sportmaster.ru/product/10103216/",
+   "conf": "оценка",
+   "stage": "main"
+  },
+  {
+   "id": "breaker",
+   "group": "power",
+   "name": "Автомат TDM ВА47-60DC 2P 10 А (C), постоянный ток",
+   "spec": "в ящике батареи: ежедневный выключатель (XT60 стыкуют без искры) и второй рубеж после защиты батареи. 10 А хватает: привод берёт от батареи до ≈8 А (расчёт 10.11), а у батареи с Авито защита на 10 А. Если на корпусе есть «+» и «−» — плюс батареи к «+»",
+   "qty": 1,
+   "price": 970,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/avt-vykl-va47-60dc-2p-10a-6ka-h-ka-s-tdm-tdm-electric-9000838940",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "xt60",
+   "group": "power",
+   "name": "Разъём XT60, пара вилка + розетка",
+   "spec": "хвост к батарее; вторая пара — переходник на батарею донора",
+   "qty": 2,
+   "price": 66,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/xt60m-f-razem-pitaniya-vilka-rozetka-2pin-olink-9002110698",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "wire14",
+   "group": "power",
+   "name": "Провод силиконовый 14AWG красный, 1 м",
+   "spec": "хвост XT60 → автомат, 2 куска по 0,5 м; чёрного метрами нет — минус пометить чёрной термоусадкой",
+   "qty": 1,
+   "price": 330,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/provod-silikonovyy-14awg-2-08-kv-mm-krasnyy-ab-retail-9002036623",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "ferrule",
+   "group": "power",
+   "name": "Наконечники НШВИ 1,5-08, упаковка 100 шт. (IEK)",
+   "spec": "жилы в клеммах автомата не разлохматятся на тряске",
+   "qty": 1,
+   "price": 74,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/ugn11-008-d15-100-g-upakovka-iz-100-nakonechnik-nshvi-iek-9001205353",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "box",
+   "group": "box",
+   "name": "Коробка Ruvinil ОП 240×195×90 IP65",
+   "spec": "коробка платы под днищем над мостом, крышкой вниз",
+   "qty": 1,
+   "price": 520,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/korobka-raspredelitelnaya-op-240x195x90mm-ip65-bez-ruvinil-8000847973",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "cable",
+   "group": "box",
+   "name": "Кабель резиновый КГтп-ХЛ 4×1,5, метр",
+   "spec": "до −60 °C: 3 м ручка → коробка, 1 м коробка → ящик батареи. На складе ровно 4 м — забрать все сразу",
+   "qty": 4,
+   "price": 150,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/hb000005631-kabel-silovoy-kgtp-hl-4x1-5-n-metallist-9002293467",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "gland13",
+   "group": "box",
+   "name": "Кабельный ввод DKC IP68 PG13,5 с контргайкой",
+   "spec": "4 — коробка платы, 1 — ящик батареи, 1 — пульт",
+   "qty": 6,
+   "price": 70,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/vvod-kabelnyy-dkab-6-12mm-ip68-pg13.5-s-kontrgaykoy-dkc-9000410792",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "gland7",
+   "group": "box",
+   "name": "Кабельный ввод DKC IP68 PG7",
+   "spec": "жгут концевика в пульт",
+   "qty": 1,
+   "price": 50,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/vvod-kabelnyy-dkab-3-6.5mm-ip68-pg7-s-kontrgaykoy-dkc-9000653458",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "vent",
+   "group": "box",
+   "name": "Клапан выравнивания давления КВП-М12",
+   "spec": "IP68, −40 °C: коробка «дышит» и не потеет",
+   "qty": 1,
+   "price": 54,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/kvp-m12-ch-klapan-vyravnivaniya-davleniya-fortisflex-9001431039",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "gel",
+   "group": "box",
+   "name": "Силикагель в стиках по 5 г, упаковка 200 г",
+   "spec": "4–8 стиков в коробку платы и пульт; раз в месяц сушить. Мельче в ЧипДипе нет",
+   "qty": 1,
+   "price": 600,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/silikagel-granulirovannyy-v-stikah-po-5gr-upakovka-solins-9000078487",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "shrink",
+   "group": "box",
+   "name": "Клеевая термоусадка КВТ, набор 4,8 / 6 / 9 мм",
+   "spec": "все пайки и колпачок на провод 15 В",
+   "qty": 1,
+   "price": 370,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/73662-nabor-20-kleevyh-termousadochnyh-trubok-100mm-kvt-9000669708",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "grease",
+   "group": "box",
+   "name": "Смазка силиконовая Silicot Rezin, 30 мл",
+   "spec": "уплотнители крышек, сальники моторов, ось рычага",
+   "qty": 1,
+   "price": 310,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/2101-smazka-silikonovaya-silicot-rezin-30-ml-vmpavto-9000723895",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "sealant",
+   "group": "box",
+   "name": "Герметик нейтральный DONEWELL, 64 г",
+   "spec": "клеммы пульта, болты сквозь коробку, выход провода из оси мотора",
+   "qty": 1,
+   "price": 150,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/germetik-prokladka-seryy-64-gr-neytralnyy-donewell-8067263230",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "wago",
+   "group": "box",
+   "name": "Клеммы КВТ СМК 221: 412 ×8, 413 ×5, 415 ×3",
+   "spec": "Для новой платки нужны две четырёхконтактные колодки с независимыми контактами либо 8 отдельных СМК 221-412 из этой позиции. Отверстия одной СМК соединены внутри: разные сигналы держать в разных клеммах. Сигнальные детали припаять к отдельной платке.",
+   "qty": 1,
+   "price": 451,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/smk-221-412-klemma-stroitelno-montazhnaya-2pin-kvt-9001187574",
+   "conf": "карточка",
+   "stage": "main",
+   "parts": [
+    {
+     "name": "СМК 221-412",
+     "qty": 8,
+     "price": 25,
+     "url": "https://www.chipdip.ru/product/smk-221-412-klemma-stroitelno-montazhnaya-2pin-kvt-9001187574"
+    },
+    {
+     "name": "СМК 221-413",
+     "qty": 5,
+     "price": 28,
+     "url": "https://www.chipdip.ru/product/smk-221-413-klemma-stroitelno-montazhnaya-3pin-kvt-9001187575"
+    },
+    {
+     "name": "СМК 221-415 (в наличии 3 шт.; нет — EKF, 47 ₽)",
+     "qty": 3,
+     "price": 37,
+     "url": "https://www.chipdip.ru/product/smk-221-415-klemma-stroitelno-montazhnaya-5pin-kvt-9001187576"
+    }
+   ]
+  },
+  {
+   "id": "pot",
+   "group": "handle",
+   "name": "Колёсико скорости: потенциометр JBR-BC-103-R 10 кОм IP65",
+   "spec": "Оставить для стенда после замера 9–11 кОм. Паспорт JB указывает 200 циклов, расходится с карточкой по температуре. Для ежедневной работы выбирать панельный линейный 10 кОм с большим ресурсом; ручку Ø35 примерить в перчатке.",
+   "qty": 1,
+   "price": 410,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/jbr-bc-103-r-10-kom-ip65-potentsiometr-jb-capacitors-9001904690",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "buttons",
+   "group": "handle",
+   "name": "Кнопка LAS3D-16F-10EM IP67 без фиксации",
+   "spec": "Уже купленная — только для стенда: паспорт от 3 мА, в пульте около 0,34 мА. Для постоянной сборки: без фиксации, позолоченные контакты с паспортом на 0,1 мА при 3,3 В; пример NKK YB15WCKG01 + колпачок AT3002CB. Цена ниже относится к исходной LAS3D, не к замене. Штатную кнопку питания оставить.",
+   "qty": 1,
+   "price": 300,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/las3d-16f-10em-knopka-antivandalnaya-metalicheskaya-s-daier-9001989623",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "pod",
+   "group": "handle",
+   "name": "Коробочка Ruvinil ОП 85×85×45 IP65",
+   "spec": "пульт на ручке; крышку дополнительно прижать 2 саморезами",
+   "qty": 1,
+   "price": 71,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/korobka-raspredelitelnaya-op-85x85x45mm-ruvinil-8004121926",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "resistors",
+   "group": "handle",
+   "name": "Резисторы MF-25 1 %: 4,7 кОм ×2, 10 кОм, 220 Ом; конденсаторы 100 нФ ×3",
+   "spec": "Один 4,7 кОм (R4) в ручке. Второй 4,7 кОм (R3), 10 кОм (R2), 220 Ом (R1) и три 100 нФ припаять на отдельную платку возле YK99. Клеммы — для кабелей.",
+   "qty": 1,
+   "price": 59,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/mf-25-s2-23-0.25vt-4.7-kom-1-rezistor-metalloplenochnyy-1849",
+   "conf": "карточка",
+   "stage": "main",
+   "parts": [
+    {
+     "name": "4,7 кОм",
+     "qty": 2,
+     "price": 8,
+     "url": "https://www.chipdip.ru/product/mf-25-s2-23-0.25vt-4.7-kom-1-rezistor-metalloplenochnyy-1849"
+    },
+    {
+     "name": "10 кОм",
+     "qty": 1,
+     "price": 8,
+     "url": "https://www.chipdip.ru/product/mf-25-s2-23-0.25vt-10-kom-1-rezistor-metalloplenochnyy-41486"
+    },
+    {
+     "name": "220 Ом",
+     "qty": 1,
+     "price": 8,
+     "url": "https://www.chipdip.ru/product/mf-25-s2-23-0.25vt-220-om-1-rezistor-metalloplenochnyy-27226"
+    },
+    {
+     "name": "100 нФ ×3, керамика с двумя ножками, X7R, 50 В (JB JYM или аналог)",
+     "qty": 3,
+     "price": 9,
+     "url": "https://www.chipdip.ru/product/k10-17b-0.1mkf-x7r-50v-10-0805-jb-capacitors-9001397245"
+    }
+   ]
+  },
+  {
+   "id": "stlink",
+   "group": "flash",
+   "name": "Программатор ST-Link V2",
+   "spec": "прошивку записываю я с Mac. На этой карточке есть вариант за 321 ₽ с доставкой 7.11 — брать его",
+   "qty": 1,
+   "price": 321,
+   "shop": "Яндекс Маркет",
+   "url": "https://market.yandex.ru/card/programmator-stlink-v2--st-link-v2-dlya-stm32-i-stm8/101902894721",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "dupont",
+   "group": "flash",
+   "name": "Провода «мама-мама» 20 см, 10 шт. + гребёнка PLS-40",
+   "spec": "ST-Link ↔ плата; 1 штырёк — питание ручки 3,3 В",
+   "qty": 1,
+   "price": 115,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/jumper-wire-1-pin-2.54-pitch-200mm-10-pcs-pack-waveshare-9001319715",
+   "conf": "карточка",
+   "stage": "main",
+   "parts": [
+    {
+     "name": "провода F-F 20 см, 10 шт.",
+     "qty": 1,
+     "price": 98,
+     "url": "https://www.chipdip.ru/product/jumper-wire-1-pin-2.54-pitch-200mm-10-pcs-pack-waveshare-9001319715"
+    },
+    {
+     "name": "гребёнка PLS-40",
+     "qty": 1,
+     "price": 17,
+     "url": "https://www.chipdip.ru/product/pls-40-shtyrev-soed-1x40-shag-2.54mm-odnoryadnoe-na-platu-9000421698"
+    }
+   ]
+  },
+  {
+   "id": "angle50",
+   "group": "axle",
+   "name": "Уголок 50×50×5, 3 м — нарезать 4 куска по 60 мм (щёки вилок)",
+   "spec": "сначала 5 замеров (раздел «Задний мост», шаг 3); если H > 33 мм — нужен 63×40×5, его в Лемане нет (рынок). 3 м в легковую не влезает — заказ с доставкой; пилить болгаркой, остаток ≈2,7 м",
+   "qty": 1,
+   "price": 1060,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/ugolok-metallicheskiy-50x50x5-mm-3-m-13376859/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "metal_market",
+   "group": "axle",
+   "name": "Рынок «Мельница»: уголок и пластины нарезанными в размер — если пилить не хочется",
+   "spec": "вместо уголка и листа выше: уголок 4 × 60 мм, пластины 60×120×5 (или полоса 30×4 — 8 × 120 мм); самовывоз, 41 км по МКАД; цена — оценка",
+   "qty": 1,
+   "price": 350,
+   "shop": "Авито, рынок «Мельница»",
+   "url": "https://www.avito.ru/moskva/remont_i_stroitelstvo/ugolok_50h50h5_4022417160",
+   "conf": "оценка",
+   "stage": "alt"
+  },
+  {
+   "id": "strip",
+   "group": "axle",
+   "name": "Лист стальной 300×200×5 — нарезать 4 пластины 60×120 (подошвы и подкладки вилок)",
+   "spec": "вместо полосы 30×4: её в Лемане нет, а 40×4 вдвоём рядом не влезают снизу рамы. Резка болгаркой: полоса 120 мм вдоль длинной стороны (рез 300), из неё 4 пластины по 60 (4 реза по 120), обрезок ≈55 мм",
+   "qty": 1,
+   "price": 750,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/metallicheskaya-plastina-300x200x5mm-seryy-98384395/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "bolt8",
+   "group": "axle",
+   "name": "Болты 8.8 оцинк.: М8×40 — 2 пачки по 8 шт., М10×70 — 3 шт.",
+   "spec": "М8×40 годится при толщине плиты рамы до 11 мм (при тонкой плите хвост под рамой длиннее — не страшно, крышку прорезать); толще 11 мм — вместо них М8×50 (в запасных путях). Вторая пачка — запас. М10×70 — поперечные над осью, 2 + 1 запасной",
+   "qty": 1,
+   "price": 269,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/bolt-din-933-8x40-mm-ocinkovannyy-8-sht-89397194/",
+   "conf": "карточка",
+   "stage": "main",
+   "parts": [
+    {
+     "name": "болт М8×40 DIN 933 8.8 оцинк., пачка 8 шт.",
+     "qty": 2,
+     "price": 97,
+     "url": "https://lemanapro.ru/product/bolt-din-933-8x40-mm-ocinkovannyy-8-sht-89397194/"
+    },
+    {
+     "name": "болт М10×70 DIN 933 8.8 оцинк., поштучно",
+     "qty": 3,
+     "price": 25,
+     "url": "https://lemanapro.ru/product/bolt-din-933-10x70-mm-ocinkovannyy-89404254/"
+    }
+   ]
+  },
+  {
+   "id": "bolt8_long",
+   "group": "axle",
+   "name": "Болты М8×50 DIN 933 8.8, 2 пачки по 8 шт. — только если плита рамы толще 11 мм",
+   "spec": "вместо М8×40 из основного списка",
+   "qty": 2,
+   "price": 97,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/bolt-din-933-8x50-mm-ocinkovannyy-8-sht-89397195/",
+   "conf": "карточка",
+   "stage": "alt"
+  },
+  {
+   "id": "nut8",
+   "group": "axle",
+   "name": "Гайка М8 DIN 985 с нейлоном, 24 шт.",
+   "spec": "вилки — 8 шт.; держит до −40 °C",
+   "qty": 1,
+   "price": 97,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/gayka-samokontryashchayasya-m8-din-985-stal-ocinkovannaya-24-sht-89397141/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "washer8",
+   "group": "axle",
+   "name": "Шайба М8 DIN 125, пачка 40 шт.",
+   "spec": "под головки и гайки вилок — 16 шт.",
+   "qty": 1,
+   "price": 63,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/shayba-ploskaya-din-125-m8-40-sht-89397067/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "fix10",
+   "group": "axle",
+   "name": "Гайки DIN 985: М10 (12 шт.) и М12 (8 шт.); шайбы М10 DIN 125 (30 шт.)",
+   "spec": "М10 — к поперечным болтам: гаек 2, шайб 4; ещё 2 шайбы рассверлить до 14 мм под гайки М12 на концах оси; М12 — новые вместо родных",
+   "qty": 1,
+   "price": 271,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/gayka-samokontryashchayasya-m10-din-985-stal-ocinkovannaya-12-sht-89397131/",
+   "conf": "карточка",
+   "stage": "main",
+   "parts": [
+    {
+     "name": "гайка М10 DIN 985 оцинк., 12 шт.",
+     "qty": 1,
+     "price": 97,
+     "url": "https://lemanapro.ru/product/gayka-samokontryashchayasya-m10-din-985-stal-ocinkovannaya-12-sht-89397131/"
+    },
+    {
+     "name": "шайба М10 DIN 125, 30 шт.",
+     "qty": 1,
+     "price": 77,
+     "url": "https://lemanapro.ru/product/shayba-ploskaya-din-125-m10-30-sht-89397057/"
+    },
+    {
+     "name": "гайка М12 DIN 985 оцинк., 8 шт.",
+     "qty": 1,
+     "price": 97,
+     "url": "https://lemanapro.ru/product/gayka-samokontryashchayasya-m12-din-985-stal-ocinkovannaya-8-sht-89397132/"
+    }
+   ]
+  },
+  {
+   "id": "spacer",
+   "group": "axle",
+   "name": "Трубка алюминиевая 20×1,5 (внутри 17 мм), 2 м — 2 куска, распорки на концах оси",
+   "spec": "глазок раскоса → трубка (внутри набить Литолом) → шайба М10, рассверленная до 14 мм → новая гайка М12, затянуть слегка; длина трубки = гладкая часть оси + 0,5–1 мм. Стальной 20×1,5 в Лемане нет; алюминий на морозе не ползёт, как пластик. Шире Ø20 ничего не ставить — ляжет на прижим мотора",
+   "qty": 1,
+   "price": 490,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/truba-kruglaya-alyuminiy-20x15x2000-mm-seraya-12359985/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "bolt6",
+   "group": "box",
+   "name": "Крепёж М6 оцинк.: болты М6×30 (20 шт.), гайки DIN 985 (30 шт.), шайбы DIN 125 и DIN 9021",
+   "spec": "коробка платы и ящик батареи; М6×25 пачкой в Лемане нет — ×30 годится",
+   "qty": 1,
+   "price": 355,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/bolt-din-933-6x30-mm-ocinkovannyy-20-sht-89397183/",
+   "conf": "карточка",
+   "stage": "main",
+   "parts": [
+    {
+     "name": "болт М6×30 DIN 933 оцинк., 20 шт.",
+     "qty": 1,
+     "price": 97,
+     "url": "https://lemanapro.ru/product/bolt-din-933-6x30-mm-ocinkovannyy-20-sht-89397183/"
+    },
+    {
+     "name": "гайка М6 DIN 985 оцинк., 30 шт.",
+     "qty": 1,
+     "price": 96,
+     "url": "https://lemanapro.ru/product/gayka-samokontryashchayasya-m6-din-985-stal-ocinkovannaya-30-sht-89397140/"
+    },
+    {
+     "name": "шайба М6 DIN 125, 60 шт.",
+     "qty": 1,
+     "price": 76,
+     "url": "https://lemanapro.ru/product/shayba-ploskaya-din-125-m6-60-sht-89397066/"
+    },
+    {
+     "name": "шайба кузовная М6 DIN 9021, 30 шт.",
+     "qty": 1,
+     "price": 86,
+     "url": "https://lemanapro.ru/product/shayba-kuzovnaya-din-9021-m6-30-sht-89397084/"
+    }
+   ]
+  },
+  {
+   "id": "smallfix",
+   "group": "box",
+   "name": "Мелкий крепёж: винты М3×10, М4×20, М5×16 и гайки М3, М4",
+   "spec": "упор-винт, плата на пластине, рейка автомата; М2 не нужен — концевика больше нет",
+   "qty": 1,
+   "price": 476,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/vint-din-7985-3x10-mm-ocinkovannyy-50-sht-89397437/",
+   "conf": "карточка",
+   "stage": "main",
+   "parts": [
+    {
+     "name": "винт М3×10 DIN 7985 оцинк., 50 шт.",
+     "qty": 1,
+     "price": 100,
+     "url": "https://lemanapro.ru/product/vint-din-7985-3x10-mm-ocinkovannyy-50-sht-89397437/"
+    },
+    {
+     "name": "гайка М3 DIN 934, 120 шт.",
+     "qty": 1,
+     "price": 87,
+     "url": "https://lemanapro.ru/product/gayka-shestigrannaya-m3-din-934-stal-ocinkovannaya-120-sht-89397126/"
+    },
+    {
+     "name": "винт М4×20 DIN 7985 оцинк., 30 шт.",
+     "qty": 1,
+     "price": 101,
+     "url": "https://lemanapro.ru/product/vint-din-7985-4x20-mm-ocinkovannyy-30-sht-89397424/"
+    },
+    {
+     "name": "гайка М4 DIN 934, 60 шт.",
+     "qty": 1,
+     "price": 87,
+     "url": "https://lemanapro.ru/product/gayka-shestigrannaya-m4-din-934-stal-ocinkovannaya-60-sht-89397127/"
+    },
+    {
+     "name": "винт М5×16 DIN 7985 оцинк., 20 шт.",
+     "qty": 1,
+     "price": 101,
+     "url": "https://lemanapro.ru/product/vint-din-7985-5x16-mm-ocinkovannyy-20-sht-89397413/"
+    }
+   ]
+  },
+  {
+   "id": "zinc",
+   "group": "axle",
+   "name": "Цинконаполненная грунт-эмаль Elcon Zintech, аэрозоль 520 мл",
+   "spec": "срезы и отверстия, 2 слоя; на прижимаемые плоскости — тонко",
+   "qty": 1,
+   "price": 547,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/cinkonapolnennaya-grunt-emal-elcon-zintech-aerozol-520ml-92710758/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "litol",
+   "group": "axle",
+   "name": "Литол-24 Титан-СМ, 100 мл",
+   "spec": "резьбы, шкворень, шарнир ручки",
+   "qty": 1,
+   "price": 130,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/smazka-titan-sm-litol-24-100-ml-87420157/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "ties",
+   "group": "handle",
+   "name": "Хомуты червячные 16–27 мм ×2 и морозостойкие стяжки 100 шт.",
+   "spec": "переходник пульта на ручке, кабель вдоль дышла",
+   "qty": 1,
+   "price": 580,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/homut-chervyachnyy-w2-16x27-mm-2-sht-10113754/",
+   "conf": "карточка",
+   "stage": "main",
+   "parts": [
+    {
+     "name": "хомут червячный W2 16–27 мм, 2 шт.",
+     "qty": 1,
+     "price": 78,
+     "url": "https://lemanapro.ru/product/homut-chervyachnyy-w2-16x27-mm-2-sht-10113754/"
+    },
+    {
+     "name": "стяжки Abro 4,8×250 морозостойкие, 100 шт.",
+     "qty": 1,
+     "price": 502,
+     "url": "https://lemanapro.ru/product/homuty-kabelnye-abro-48x250mm-neylon-morozostoykiy-100sht-chernyy-90845275/"
+    }
+   ]
+  },
+  {
+   "id": "board_kachu",
+   "group": "drive",
+   "name": "Плата TaoTao из КаЧу — только если родная плата гироскутера не заведётся",
+   "spec": "та же модель; чип смотреть у прилавка до оплаты",
+   "qty": 1,
+   "price": 1900,
+   "shop": "КаЧу, 5-я Кабельная, 2с1",
+   "url": "https://www.segwayninebot.ru/catalog/zapchasti_i_komplektuyushchie_dlya_giroskuterov/dlya_giroskuterov/tsentralnaya_plata_upravleniya_giroskuterom_tao_tao_app/",
+   "conf": "карточка",
+   "stage": "alt"
+  },
+  {
+   "id": "motors_new",
+   "group": "drive",
+   "name": "Новые мотор-колёса 10,5″ — если донора нет или его ось коротка",
+   "spec": "вместо б/у гироскутера; наличие подтвердить звонком (у КаЧу 10,5″ «нет в наличии» на 04.11); выступ оси мерить в магазине, ≥ 73 мм для шины 85/65",
+   "qty": 2,
+   "price": 2500,
+   "shop": "Futumag24, Смольная, 63Б",
+   "url": "https://futumag24.ru/products/motor-koleso-10-5-v-sbore-na-giroskuter",
+   "conf": "карточка",
+   "stage": "alt"
+  },
+  {
+   "id": "battery10",
+   "group": "power",
+   "name": "Батарея VBS 36 В 10,4 А·ч вместо 8 А·ч",
+   "spec": "запас хода ×2,2; доплата к смете",
+   "qty": 1,
+   "price": 10206,
+   "shop": "ВольтБайкс",
+   "url": "https://www.voltbikes.ru/shop/electrovelosiped/akkumulyatory-dlya-elektrovelosipedov/litievyj-akkumulyator-vbs-36v-ot-8ach-v-treugolnoj-sumke-na-ramu-s-zu/",
+   "conf": "карточка",
+   "stage": "opt"
+  },
+  {
+   "id": "timer",
+   "group": "power",
+   "name": "Розетка с суточным таймером Camelion BND-50/G5A",
+   "spec": "зарядка сама включится через 2–3 ч, когда батарея согреется; окно выставить один раз (например, 22:00–06:00)",
+   "qty": 1,
+   "price": 700,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/bnd-50-g5a-rozetka-s-mehanicheskim-taymerom-camelion-9000154759",
+   "conf": "карточка",
+   "stage": "opt"
+  },
+  {
+   "id": "movil",
+   "group": "axle",
+   "name": "Мовиль с цинком VIXEN Antiruster, аэрозоль 520 мл",
+   "spec": "весь узел вилок после сборки, весной — после мойки",
+   "qty": 1,
+   "price": 318,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/aerozol-movil-s-cinkom-antiruster-052-l-82356791/",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "delivery_lemana",
+   "group": "axle",
+   "name": "Доставка заказа Леманы",
+   "spec": "одним заказом всё для вилок; «от 390 ₽» — точную цену покажет корзина",
+   "qty": 1,
+   "price": 390,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/service/dostavka/",
+   "conf": "оценка",
+   "stage": "main"
+  },
+  {
+   "id": "tyres",
+   "group": "drive",
+   "name": "Зимние покрышки CST с шипами-грунтозацепами",
+   "spec": "только если штатные буксуют; металлические шипы нельзя — поцарапают пол ПВЗ",
+   "qty": 2,
+   "price": 1783,
+   "shop": "Яндекс Маркет",
+   "url": "",
+   "conf": "карточка",
+   "stage": "opt"
+  },
+  {
+   "id": "bumper",
+   "group": "axle",
+   "name": "Теплоизоляция для труб Isocom 35×9 мм, 2 м",
+   "spec": "передний край кузова",
+   "qty": 1,
+   "price": 66,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/teploizolyaciya-dlya-trub-isocom-35x9-mm-2-m-polietilen-89438484/",
+   "conf": "карточка",
+   "stage": "opt"
+  },
+  {
+   "id": "uart",
+   "group": "flash",
+   "name": "Преобразователь USB-UART CP2102",
+   "spec": "сверить, какое напряжение видит плата YK99 (её делитель не проверен): по нему работают защита от перенапряжения, «садится батарея» и выключение по разряду. Подключается к правому кабелю платы, читаю я с Mac. Заодно видно, что плата видит на стенде",
+   "qty": 1,
+   "price": 600,
+   "shop": "ЧипДип",
+   "url": "https://www.chipdip.ru/product/cp2102-module-preobrazovatel-usb-uart-9000197232",
+   "conf": "карточка",
+   "stage": "main"
+  },
+  {
+   "id": "multimeter",
+   "group": "tools",
+   "name": "Мультиметр Elitech ММ 100",
+   "spec": "обязателен: найти провод 15 В и проверить плюс/минус до первого включения",
+   "qty": 1,
+   "price": 465,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/multimetr-elitech-mm-100-89202631/",
+   "conf": "карточка",
+   "stage": "tool"
+  },
+  {
+   "id": "caliper",
+   "group": "tools",
+   "name": "Штангенциркуль цифровой Elitech 150 мм",
+   "spec": "лыска и выступ оси мотора, шаг отверстий",
+   "qty": 1,
+   "price": 593,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/shtangencirkul-cifrovoy-elitech-150-mm-84552333/",
+   "conf": "карточка",
+   "stage": "tool"
+  },
+  {
+   "id": "clamp",
+   "group": "tools",
+   "name": "Струбцина F-образная Dexter 150 мм",
+   "spec": "3 шт.: щёки к ноге, пакет к раме, подкладка снизу",
+   "qty": 3,
+   "price": 238,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/strubcina-f-obraznaya-dexter-ty-ade-015-50x150-150-mm-82305119/",
+   "conf": "карточка",
+   "stage": "tool"
+  },
+  {
+   "id": "drills",
+   "group": "tools",
+   "name": "Свёрла по металлу: набор Matrix 1–10 мм (19 шт.) + 10,5 мм HSS-Co",
+   "spec": "из набора — 3,5 / 6,5 / 8,5; 10,5 — под поперечный болт М10: хвост 10,5 мм, патрон дрели нужен на 13 мм",
+   "qty": 1,
+   "price": 1752,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/nabor-sverl-po-metallu-matrix-72388-92817411/",
+   "conf": "карточка",
+   "stage": "tool",
+   "parts": [
+    {
+     "name": "набор Matrix 72388, 1–10 мм через 0,5, 19 шт.",
+     "qty": 1,
+     "price": 982,
+     "url": "https://lemanapro.ru/product/nabor-sverl-po-metallu-matrix-72388-92817411/"
+    },
+    {
+     "name": "сверло 10,5 мм HSS-Co D.Bor",
+     "qty": 1,
+     "price": 770,
+     "url": "https://lemanapro.ru/product/sverlo-po-metallu-hss-co-dbor-td-338-co5-105-01-105x133-mm-91249316/"
+    }
+   ]
+  },
+  {
+   "id": "discs",
+   "group": "tools",
+   "name": "Круги к болгарке 125 мм: отрезные по металлу 1 мм ×5 и лепестковый Р60",
+   "spec": "отрезные — уголок и лист; лепестковый — торцы, заусенцы, выступы литья под пластиной. Болгарка на 115 мм — круги 115",
+   "qty": 1,
+   "price": 332,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/disk-otreznoy-po-metallu-tip-41-vertextools-125x222x1-mm-89474035/",
+   "conf": "карточка",
+   "stage": "tool",
+   "parts": [
+    {
+     "name": "круг отрезной по металлу Vertextools 125×1×22,2",
+     "qty": 5,
+     "price": 40,
+     "url": "https://lemanapro.ru/product/disk-otreznoy-po-metallu-tip-41-vertextools-125x222x1-mm-89474035/"
+    },
+    {
+     "name": "круг лепестковый торцевой КЛТ1 Flexione Р60 125",
+     "qty": 1,
+     "price": 132,
+     "url": "https://lemanapro.ru/product/krug-lepestkovyy-torcevoy-klt1-flexione-r60-125x222-mm-85362131/"
+    }
+   ]
+  },
+  {
+   "id": "saw",
+   "group": "tools",
+   "name": "Ножовка по металлу Vertextools 300 мм + 2 биметаллических полотна",
+   "spec": "только если болгарки нет: ≈2 ч резов, длинные — с двух краёв или полотно на 90°",
+   "qty": 1,
+   "price": 832,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/pila-ruchnaya-po-metallu-vertextools-300-mm-bimetallicheskaya-89471568/",
+   "conf": "карточка",
+   "stage": "alt",
+   "parts": [
+    {
+     "name": "ножовка Vertextools 300 мм",
+     "qty": 1,
+     "price": 650,
+     "url": "https://lemanapro.ru/product/pila-ruchnaya-po-metallu-vertextools-300-mm-bimetallicheskaya-89471568/"
+    },
+    {
+     "name": "полотно 3732-F биметалл 300 мм, 2 шт.",
+     "qty": 1,
+     "price": 182,
+     "url": "https://lemanapro.ru/product/polotno-po-metallu-3732-f-bimetall-300-mm-85585804/"
+    }
+   ]
+  },
+  {
+   "id": "kern",
+   "group": "tools",
+   "name": "Кернер автоматический Кобальт",
+   "spec": "наметить центры отверстий, чтобы сверло не ушло",
+   "qty": 1,
+   "price": 270,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/kerner-avtomaticheskiy-kobalt-916-448-4x130-mm-89374087/",
+   "conf": "карточка",
+   "stage": "tool"
+  },
+  {
+   "id": "square",
+   "group": "tools",
+   "name": "Угольник Vertextools 180 мм",
+   "spec": "разметка торцов и поперечного отверстия",
+   "qty": 1,
+   "price": 330,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/ugolnik-stolyarnyy-vertextools-3040-180-89394350/",
+   "conf": "карточка",
+   "stage": "tool"
+  },
+  {
+   "id": "keys",
+   "group": "tools",
+   "name": "Ключи Oasis: 13 мм ×2, 17 мм ×2, 19 мм; головка 13 мм 1/4″ к динамометрическому ключу",
+   "spec": "13 — болты М8, 17 — поперечные М10, 19 — гайки М12 на концах оси (родная бывает на 18 — тогда разводным); головка — затяжка М8 на 15 Н·м",
+   "qty": 1,
+   "price": 636,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/klyuch-kombinirovannyy-oasis-103011501101-13-mm-89450553/",
+   "conf": "карточка",
+   "stage": "tool",
+   "parts": [
+    {
+     "name": "ключ 13 мм",
+     "qty": 2,
+     "price": 80,
+     "url": "https://lemanapro.ru/product/klyuch-kombinirovannyy-oasis-103011501101-13-mm-89450553/"
+    },
+    {
+     "name": "ключ 17 мм",
+     "qty": 2,
+     "price": 108,
+     "url": "https://lemanapro.ru/product/klyuch-kombinirovannyy-oasis-103011501102-17-mm-89450560/"
+    },
+    {
+     "name": "ключ 19 мм",
+     "qty": 1,
+     "price": 200,
+     "url": "https://lemanapro.ru/product/klyuch-kombinirovannyy-oasis-eco-103011501028-19-mm-89462929/"
+    },
+    {
+     "name": "головка торцевая 13 мм, квадрат 1/4″",
+     "qty": 1,
+     "price": 60,
+     "url": "https://lemanapro.ru/product/golovka-torcevaya-shestigrannaya-oasis-103011901046-1-4-dyuymov-13-mm-89462417/"
+    }
+   ]
+  },
+  {
+   "id": "file",
+   "group": "tools",
+   "name": "Напильник плоский Курс 200 мм",
+   "spec": "только если болгарки нет — с ней торцы и заусенцы снимает лепестковый круг",
+   "qty": 1,
+   "price": 525,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/napilnik-kurs-42506-200-mm-98337304/",
+   "conf": "карточка",
+   "stage": "alt"
+  },
+  {
+   "id": "stepdrill",
+   "group": "tools",
+   "name": "Ступенчатое сверло HSS 4–32 мм (370106)",
+   "spec": "вводы PG13,5: до ступени 20 мм, дальше напильником",
+   "qty": 1,
+   "price": 543,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/sverlo-stupenchatoe-po-metallu-hss-370106-4-32-mm-89415147/",
+   "conf": "карточка",
+   "stage": "tool"
+  },
+  {
+   "id": "torque",
+   "group": "tools",
+   "name": "Динамометрический ключ AV Steel AV-517060, 10–60 Н·м, 1/4″",
+   "spec": "болты полок вилок — 15 Н·м и дотяжка; головка 13 мм — в позиции «Ключи». Дешевле на 1 339 ₽ — Reznu 3–25 Н·м с Авито (отдельная покупка)",
+   "qty": 1,
+   "price": 2599,
+   "shop": "Лемана ПРО",
+   "url": "https://lemanapro.ru/product/klyuch-dinamometricheskiy-av-steel-av-517060-1-4-dyuyma-10x60-nm-90574640/",
+   "conf": "карточка",
+   "stage": "tool"
+  }
+ ]
+}

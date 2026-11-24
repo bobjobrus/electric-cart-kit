@@ -1,0 +1,917 @@
+diff --git a/Inc/config.h b/Inc/config.h
+index 8f697f4..f651cc3 100644
+--- a/Inc/config.h
++++ b/Inc/config.h
+@@ -20,6 +20,7 @@
+   //#define VARIANT_HOVERBOARD  // Variant for HOVERBOARD build
+   //#define VARIANT_TRANSPOTTER // Variant for TRANSPOTTER build https://github.com/NiklasFauth/hoverboard-firmware-hack/wiki/Build-Instruction:-TranspOtter https://hackaday.io/project/161891-transpotter-ng
+   //#define VARIANT_SKATEBOARD  // Variant for SKATEBOARD build
++  //#define VARIANT_CART        // Электротележка: кнопка «ехать» + колёсико скорости (см. раздел VARIANT_CART ниже)
+ #endif
+ // ########################### END OF VARIANT SELECTION ############################
+ 
+@@ -73,8 +74,8 @@
+  * Then you can verify voltage on debug output value 6 (to get calibrated voltage multiplied by 100).
+ */
+ #define BAT_FILT_COEF           655       // battery voltage filter coefficient in fixed-point. coef_fixedPoint = coef_floatingPoint * 2^16. In this case 655 = 0.01 * 2^16
+-#define BAT_CALIB_REAL_VOLTAGE  3970      // input voltage measured by multimeter (multiplied by 100). In this case 43.00 V * 100 = 4300
+-#define BAT_CALIB_ADC           1492      // adc-value measured by mainboard (value nr 5 on UART debug output)
++#define BAT_CALIB_REAL_VOLTAGE  4120      // YK99 владельца: 41,2 В на входе платы, мультиметр, 14.11.2026
++#define BAT_CALIB_ADC           1632      // YK99: сырое АЦП 0x660 при 41,2 В; чтение через SWD
+ #define BAT_CELLS               10        // battery number of cells. Normal Hoverboard battery: 10s
+ #define BAT_LVL2_ENABLE         0         // to beep or not to beep, 1 or 0
+ #define BAT_LVL1_ENABLE         1         // to beep or not to beep, 1 or 0
+@@ -646,6 +647,168 @@
+ 
+ 
+ 
++// ################################# VARIANT_CART SETTINGS ##############################
++#ifdef VARIANT_CART
++/* ЭЛЕКТРОТЕЛЕЖКА (aisheff.ru, 2026). Два мотор-колеса гироскутера стоят вместо задних колёс садовой
++ * тележки, поворачивает человек передней осью через ручку, идёт ВПЕРЕДИ и тянет.
++ *
++ * Органы управления на ручке (v2.2, 05.11.2026: кнопка «ехать» вместо рычага, без «назад») — всё на ЛЕВЫЙ кабель
++ * датчиков (3,3 В!; красный провод 15 В НЕ трогать), кабель до пульта 4 жилы: +3,3 / минус / рычаг / колёсико:
++ *   PA3 (зелёный) — кнопка «ехать», без фиксации, герметичная. Лучше с перекидным контактом (1NO+1NC, ON-(ON)):
++ *                   COM → жила «рычаг», NC → жила «минус» (на ней больше НИЧЕГО), NO → 4,7 кОм → «+3,3».
++ *                   Кнопка с одним NO — без жилы на NC (защита от солёной воды слабее, см. firmware/test).
++ *                   У платы 4,7 кОм на массу + 100 нФ. Отпущена = 0 В при ЛЮБОМ обрыве; нажата ≈1,6 В;
++ *                   замыкание на +3,3 ≈3,1 В — сбой. С CART_REVERSE 1 — ещё кнопка «назад»: «+3,3» → 2,2 кОм → NO, ≈2,4 В.
++ *   PA2 (синий)   — колёсико скорости: потенциометр 10 кОм как переменный резистор «+3,3» → жила «колёсико»;
++ *                   у платы 10 кОм на массу + 100 нФ: ≈1,6 В (минимум) … 3,2 В (максимум); обрыв = 0 В = сбой.
++ *   Питание ручки 3,3 В — с гребёнки прошивки (SWD) через 220 Ом. Схема: страница проекта, раздел «Проводка».
++ * Правый кабель свободен: на нём отладочный порт USART3 (115200) — смотреть сырые значения и батарею.
++ *
++ * Поведение (код: Src/util.c, cartControl()):
++ *   cart.bin           → синусоидальное управление напряжением: кнопка разрешает тягу, колёсико задаёт скорость.
++ *                        При превышении задания или отпускании кнопки силовые выходы отключаются для наката.
++ *   cart-bench.bin     → прежний режим момента (TRQ): оба колеса получают ОДИНАКОВЫЙ момент, поэтому в повороте
++ *                       сами крутятся с разной скоростью (как дифференциал). Момент считает регулятор средней
++ *                       скорости тележки: держит скорость с колёсика 1..5 км/ч и в подъём, и под горку
++ *                       (там момент становится тормозящим; тормозит дольше 0,3 с — не быстрее 4 км/ч). Разгон плавный.
++ *                       Запасной потолок n_max на каждое колесо = скорость ×1,25 + 0,5 км/ч;
++ *   кнопка отпущена   → CART_COAST 1 (по умолчанию с 05.11): тяга снимается, тележка катится сама, как без моторов —
++ *                       тормоза и удержания нет (просьба владельца); CART_COAST 0 — плавная остановка и удержание
++ *                       на месте (режим скорости с целью 0 об/мин);
++ *   CART_REVERSE 1    → кнопка + «назад»: назад не быстрее 1,5 км/ч, только если сначала нажали «ехать» и тележка стоит;
++ *                       «назад» на ходу = стоп до отпускания; «назад» раньше «ехать» = не едет, 2 гудка.
++ *                       CART_REVERSE 0 (по умолчанию) — кнопки «назад» нет, такое значение на входе = сбой;
++ *   упёрлась          → момент на пределе, а тележка стоит дольше 2 с — тяга снимается, 1 гудок;
++ *   быстрее заданной на 1,5 км/ч — частый писк «держи»; быстрее 7 км/ч — писк (CART_COAST 0: удержание);
++ *   батарея < BAT_LVL1 → не быстрее 3 км/ч; кнопка питания — как «кнопка отпущена», выключает только стоящую;
++ *   при включении кнопка зажата → тележка не поедет, пока кнопку не отпустят и не нажмут снова.
++ */
++  #define FLASH_WRITE_KEY       0x1111    // свой ключ: старые калибровки из флеша не подхватываются
++  #undef  CTRL_MOD_REQ
++  #define CTRL_MOD_REQ          TRQ_MODE  // момент = «дифференциал» в поворотах
++  #define CONTROL_ADC           0         // ручка — на АЦП левого кабеля
++  #define DEBUG_SERIAL_USART3             // правый кабель: отладочный вывод (можно ничего не подключать)
++
++  //                            TYPE, MIN,  MID, MAX,  DEADBAND
++  #define PRI_INPUT1            1,    2050, 0,   3950, 0   // PA2 колёсико ≈2020..4010; MIN/MAX — окно защиты: < 1650 (обрыв) — сбой
++  #define PRI_INPUT2            0,    0,    0,   3250, 0   // PA3 рычаг: тип 0 (код читает его сам); > 3650 (замыкание на +3,3) — сбой
++  #undef  ADC_PROTECT_THRESH
++  #define ADC_PROTECT_THRESH    400       // окно защиты: MIN − 400 … MAX + 400, вне его дольше ~0,5 с — сбой (2 гудка)
++  #undef  AUTO_CALIBRATION_ENA            // калибровка кнопкой питания не нужна и сбила бы окна
++
++  #define RATE                  32767     // встроенный ограничитель скорости изменения выключен — плавность делает cartControl()
++  #define FILTER                65535     // встроенный фильтр выключен (1.0)
++  #define SPEED_COEFFICIENT     16384     // 1.0
++  #define STEER_COEFFICIENT     0         // руления моторами нет: поворачивает человек передней осью
++  #undef  INACTIVITY_TIMEOUT
++  #define INACTIVITY_TIMEOUT    30        // [мин] без движения — 10 с писка и выключение (при CART_COAST 0 пропадает удержание)
++
++  #undef  N_MOT_MAX
++  #define N_MOT_MAX             142       // [об/мин] абсолютный потолок ≈ 6,8 км/ч при колесе 254 мм (менял колесо — пересчитать)
++
++  // --------- Настройки тележки (менять здесь) ---------
++  #define CART_COAST              1       // 1 = кнопку отпустили — тяги нет, тележка катится сама; 0 = плавная остановка и удержание
++  #define CART_REVERSE            0       // 1 = есть кнопка «назад» (2,2 кОм); 0 = нет, значение «назад» на входе — сбой
++  #define CART_WHEEL_DIAM_MM      254     // [мм] наружный диаметр колеса: шина донора 10×2,125 (57-152) ≈254 (фото 14.11)
++  #define CART_SPEED_MIN_KMH10    10      // [км/ч ×10] колёсико в минимуме: 1,0 км/ч
++  #define CART_SPEED_MAX_KMH10    50      // [км/ч ×10] колёсико в максимуме: 5,0 км/ч
++  #define CART_SPEED_REV_KMH10    15      // [км/ч ×10] назад: 1,5 км/ч
++  #define CART_SPEED_DOWN_KMH10   40      // [км/ч ×10] на спуске (моторы тормозят дольше CART_DOWN_MS): не быстрее 4 км/ч
++  #define CART_SPEED_LOWBAT_KMH10 30      // [км/ч ×10] батарея ниже BAT_LVL1: не быстрее 3 км/ч
++  #define CART_ACCEL_KMH10_S      20      // [км/ч ×10 в секунду] разгон: +2 км/ч за секунду (≈0,56 м/с²)
++  #define CART_STOP_KMH10_S       50      // [км/ч ×10 в секунду] сброс скорости колёсиком (CART_COAST 0 — и остановка): −5 км/ч за с
++  #define CART_TRQ_FWD            700     // [‰ от I_MOT_MAX] наибольший тянущий момент вперёд (700‰ × 15 А = 10,5 А на колесо)
++  #define CART_TRQ_REV            400     // [‰ от I_MOT_MAX] наибольший тянущий момент назад
++  #define CART_TRQ_BRK            700     // [‰ от I_MOT_MAX] наибольший тормозящий момент на ходу (под горку)
++  #define CART_TRQ_SLEW_MS        500     // [мс] быстрее чем 0 → 100 % момент не меняется (без рывков)
++  // Регулятор средней скорости тележки (ПИ): ошибка скорости → одинаковый момент на оба колеса (= дифференциал)
++  #define CART_KP                 15      // [‰ момента на 1 об/мин ошибки] (подобрано на модели: без раскачки от 25 до 90 кг)
++  #define CART_KI                 15      // [‰ момента в секунду на 1 об/мин ошибки]
++  #define CART_DIRCHG_RPM         10      // [об/мин] «назад» — только если тележка почти стоит (≈0,5 км/ч)
++  #define CART_DEBOUNCE           4       // [циклов по 5 мс] антидребезг рычага/кнопки
++  #define CART_STALL_MS           2000    // [мс] «упёрлась»: момент на пределе и тележка стоит столько — тяга снимается
++  #define CART_GIVEUP_FADE_MS     2000    // [мс] при накате «упёрлась» снимает тягу плавно: на крутом подъёме груз не бросает
++  #define CART_STALL_RPM          6       // [об/мин] «стоит» для правила «упёрлась» (≈0,3 км/ч)
++  #define CART_DOWN_MS            300     // [мс] моторы тормозят дольше — включается потолок спуска
++  #define CART_DOWN_OFF_MS        1000    // [мс] снова тянут дольше — потолок спуска снимается
++  #define CART_OVER_KMH10         15      // [км/ч ×10] быстрее заданной на столько — частый писк «держи»
++  #define CART_RUNAWAY_KMH10      70      // [км/ч ×10] быстрее — писк; при CART_COAST 0 ещё и удержание (разогнало под горку)
++  // Перенапряжение шины: моторы тормозят, а батарея ток не принимает (полная, холод, диод, сработала её защита) —
++  // конденсаторы платы дошли бы до 60+ В за десятки мс, в EFeru защиты нет. Пороги — В ×100, как BAT_LVL*
++  // (зависят от BAT_CALIB_*: на непроверенной плате сначала сверить напряжение). Мягкая ступень — cartControl(),
++  // каждые 5 мс: тормозить моторами нельзя, потолки колёс сняты, писк. Жёсткая — прерывание 16 кГц (Src/bldc.c): ШИМ выключен.
++  #define CART_OV_SOFT_V100       4500    // [В ×100] выше — мягкая ступень (полная батарея 42,0 В; с током торможения зимой до ≈43,2 В)
++  #define CART_OV_SOFT_OFF_V100   4400    // [В ×100] ниже этого дольше CART_OV_HOLD_MS — снова можно тормозить
++  #define CART_OV_HOLD_MS         1000    // [мс]
++  #define CART_OV_HARD_V100       4800    // [В ×100] выше — ШИМ обоих мостов выключен (моторы катятся свободно)
++  #define CART_OV_HARD_OFF_V100   4600    // [В ×100] ниже — ШИМ снова разрешён
++  #define CART_OV_NMAX            1000    // [об/мин] потолок колёс при перенапряжении: у потолка контроллер тормозил бы
++  #define CART_OV_ADC(v100)       ((int32_t)(v100) * BAT_CALIB_ADC / BAT_CALIB_REAL_VOLTAGE)   // В ×100 → сырое АЦП батареи
++  #define CART_OV_SOFT_ADC        CART_OV_ADC(CART_OV_SOFT_V100)
++  #define CART_OV_SOFT_OFF_ADC    CART_OV_ADC(CART_OV_SOFT_OFF_V100)
++  #define CART_OV_HARD_ADC        CART_OV_ADC(CART_OV_HARD_V100)
++  #define CART_OV_HARD_OFF_ADC    CART_OV_ADC(CART_OV_HARD_OFF_V100)
++  #define CART_KNOB_RAW_TOP       4010    // [сырое] колёсико в максимуме (переменный резистор 0 Ом); уточнить на стенде
++  // Полосы рычага PA3 (сырые 0..4095) при питании ручки 3,3 В через 220 Ом: отпущен ≈0, сжат ≈1970, сжат+назад ≈2950
++  #define CART_LEVER_REL_HI       500
++  #define CART_LEVER_FWD_LO       1650
++  #define CART_LEVER_FWD_HI       2350
++  #define CART_LEVER_REV_LO       2650
++  #define CART_LEVER_REV_HI       3300
++
++  #define CART_SIN_MAX_VLT        200     // [‰ команды напряжения] верхний уровень, проверенный на YK99 в cart-test30
++  #define CART_SIN_RAMP            200     // [‰/с] скорость изменения команды напряжения
++  #define CART_SIN_SPEED_BAND_RPM  4       // [об/мин] полоса коррекции и зазор при возврате тяги
++
++  #if !defined(CART_BENCH) && !defined(CART_DIAG)
++    #define CART_SIN_DRIVE
++    #undef  CTRL_TYP_SEL
++    #define CTRL_TYP_SEL          SIN_CTRL
++    #undef  CTRL_MOD_REQ
++    #define CTRL_MOD_REQ          VLT_MODE
++    #undef  I_DC_MAX
++    #define I_DC_MAX              6        // [A] отсечка по шунту шины каждого мотора, как в cart-diag
++    #if !CART_COAST || CART_REVERSE
++      #error "CART_SIN_DRIVE requires coast and forward-only control"
++    #endif
++  #endif
++
++  #ifdef CART_BENCH                       // прежний FOC для сравнения (колёса в воздухе)
++    #undef  I_MOT_MAX
++    #define I_MOT_MAX             6
++    #undef  CART_SPEED_MAX_KMH10
++    #define CART_SPEED_MAX_KMH10  20
++  #endif
++
++  #ifdef CART_DIAG                        // cart-diag.bin — САМЫЙ первый пуск (колёса в воздухе), до cart-bench:
++    // синус + напряжение (без FOC и без регулятора скорости) и малый ток. Синусу не нужна точная калибровка угла:
++    // если колесо с ним крутится ровно и тихо — Холлы и фазы подключены правильно, дальше можно cart-bench.
++    // Гудит, дёргается, греется или ток упирается в предел — перепутаны фазы/Холлы: перебирать, не идти дальше.
++    // Кнопка «ехать» нажата → напряжение с колёсика (CART_DIAG_VLT_MIN..MAX ‰ от полного), отпущена → плавно 0.
++    #undef  CTRL_TYP_SEL
++    #define CTRL_TYP_SEL          SIN_CTRL
++    #undef  CTRL_MOD_REQ
++    #define CTRL_MOD_REQ          VLT_MODE  // режимы SPD/TRQ у EFeru — только для FOC
++    #undef  I_MOT_MAX
++    #define I_MOT_MAX             4
++    #undef  I_DC_MAX
++    #define I_DC_MAX              6         // [A] для синуса предел тока — по шине (I_MOT_MAX + 2 А)
++    #define CART_DIAG_VLT_MIN     40        // [‰ от полного напряжения] колёсико в минимуме (≈1,5 В — может не стронуть)
++    #define CART_DIAG_VLT_MAX     200       // [‰] колёсико в максимуме (≈7 В — без груза ≈3–5 км/ч)
++    #define CART_DIAG_RAMP_MS     1000      // [мс] от 0 до 100 % напряжения не быстрее
++  #endif
++
++  // Защита: момент должен быть меньше порога диагностики «мотор заблокирован» (ошибка 004: >12 А при стоящем колесе,
++  // r_errInpTgtThres = 9600 в BLDC_controller_data.c), иначе на крутом подъёме или у бордюра контроллер отключит моторы
++  // и тележка покатится назад. Оставляем запас: не больше 11 А.
++  #if (CART_TRQ_FWD * I_MOT_MAX) > 11000 || (CART_TRQ_REV * I_MOT_MAX) > 11000 || (CART_TRQ_BRK * I_MOT_MAX) > 11000
++    #error "VARIANT_CART: CART_TRQ_* x I_MOT_MAX > 11 A - riskuem oshibkoy 004 (motor zablokirovan). Umenshite CART_TRQ_* ili I_MOT_MAX."
++  #endif
++#endif
++// ############################# END OF VARIANT_CART SETTINGS ############################
++
++
++
+ // ########################### UART SETIINGS ############################
+ #if defined(FEEDBACK_SERIAL_USART2) || defined(CONTROL_SERIAL_USART2) || defined(DEBUG_SERIAL_USART2) || defined(SIDEBOARD_SERIAL_USART2) || \
+     defined(FEEDBACK_SERIAL_USART3) || defined(CONTROL_SERIAL_USART3) || defined(DEBUG_SERIAL_USART3) || defined(SIDEBOARD_SERIAL_USART3)
+@@ -693,7 +856,8 @@
+ 
+ // ############################### VALIDATE SETTINGS ###############################
+ #if !defined(VARIANT_ADC) && !defined(VARIANT_USART) && !defined(VARIANT_NUNCHUK) && !defined(VARIANT_PPM) && !defined(VARIANT_PWM) && \
+-    !defined(VARIANT_IBUS) && !defined(VARIANT_HOVERCAR) && !defined(VARIANT_HOVERBOARD) && !defined(VARIANT_TRANSPOTTER) && !defined(VARIANT_SKATEBOARD)
++    !defined(VARIANT_IBUS) && !defined(VARIANT_HOVERCAR) && !defined(VARIANT_HOVERBOARD) && !defined(VARIANT_TRANSPOTTER) && !defined(VARIANT_SKATEBOARD) && \
++    !defined(VARIANT_CART)
+   #error Variant not defined! Please check platformio.ini or Inc/config.h for available variants.
+ #endif
+ 
+diff --git a/Src/bldc.c b/Src/bldc.c
+index ccfb291..a0e60b2 100644
+--- a/Src/bldc.c
++++ b/Src/bldc.c
+@@ -81,6 +81,15 @@ static int16_t offsetdcr    = 2000;
+ int16_t        batVoltage       = (400 * BAT_CELLS * BAT_CALIB_ADC) / BAT_CALIB_REAL_VOLTAGE;
+ static int32_t batVoltageFixdt  = (400 * BAT_CELLS * BAT_CALIB_ADC) / BAT_CALIB_REAL_VOLTAGE << 16;  // Fixed-point filter output initialized at 400 V*100/cell = 4 V/cell converted to fixed-point
+ 
++#ifdef VARIANT_CART
++volatile int16_t batVoltageFast   = 0;     // тележка: напряжение батареи, сырое АЦП, фильтр ≈0,5 мс (перенапряжение)
++static int32_t   batVoltageFast16 = 0;     // то же ×16
++static uint8_t   cartOvCut        = 0;     // 1 = перенапряжение выше CART_OV_HARD_ADC: ШИМ обоих мостов выключен
++#define CART_OV_CUT cartOvCut
++#else
++#define CART_OV_CUT 0
++#endif
++
+ #ifdef ENABLE_ODOMETRY
+ int16_t odom_l = 0;
+ int16_t odom_r = 0;
+@@ -123,6 +132,19 @@ void DMA1_Channel1_IRQHandler(void) {
+     batVoltage = (int16_t)(batVoltageFixdt >> 16);  // convert fixed-point to integer
+   }
+ 
++#ifdef VARIANT_CART
++  // Тележка: защита от перенапряжения шины (настройки CART_OV_* в config.h). batVoltage выше сглажен на ≈6 с —
++  // для неё слишком медленно. Быстрый фильтр ≈0,5 мс: его же читает мягкая ступень в cartControl() (Src/util.c).
++  // Жёсткая ступень здесь: выше CART_OV_HARD_ADC ШИМ обоих мостов выключается до спада ниже CART_OV_HARD_OFF_ADC.
++  batVoltageFast16 += ((int32_t)adc_buffer.batt1 * 16 - batVoltageFast16) / 8;
++  batVoltageFast    = (int16_t)(batVoltageFast16 / 16);
++  if (batVoltageFast > CART_OV_HARD_ADC) {
++    cartOvCut = 1;
++  } else if (batVoltageFast < CART_OV_HARD_OFF_ADC) {
++    cartOvCut = 0;
++  }
++#endif
++
+   // Get Left motor currents
+   curL_phaA = (int16_t)(offsetrlA - adc_buffer.rlA);
+   curL_phaB = (int16_t)(offsetrlB - adc_buffer.rlB);
+@@ -133,15 +155,22 @@ void DMA1_Channel1_IRQHandler(void) {
+   curR_phaC = (int16_t)(offsetrrC - adc_buffer.rrC);
+   curR_DC   = (int16_t)(offsetdcr - adc_buffer.dcr);
+ 
+-  // Disable PWM when current limit is reached (current chopping)
+-  // This is the Level 2 of current protection. The Level 1 should kick in first given by I_MOT_MAX
+-  if(ABS(curL_DC) > curDC_max || enable == 0) {
++  // Disable PWM when current limit is reached (current chopping).
++  // In SIN mode this is the current limit; I_MOT_MAX applies to FOC.
++#ifdef CART_SIN_DRIVE
++  // A zero voltage command with the bridge switching can brake a spinning motor.
++  // Disable the gate outputs while coasting; Hall speed is still updated below.
++  const uint8_t cartCoast = (pwml == 0 && pwmr == 0) || rtY_Left.z_errCode || rtY_Right.z_errCode;
++#else
++  const uint8_t cartCoast = 0;
++#endif
++  if(ABS(curL_DC) > curDC_max || enable == 0 || CART_OV_CUT || cartCoast) {
+     LEFT_TIM->BDTR &= ~TIM_BDTR_MOE;
+   } else {
+     LEFT_TIM->BDTR |= TIM_BDTR_MOE;
+   }
+ 
+-  if(ABS(curR_DC)  > curDC_max || enable == 0) {
++  if(ABS(curR_DC)  > curDC_max || enable == 0 || CART_OV_CUT || cartCoast) {
+     RIGHT_TIM->BDTR &= ~TIM_BDTR_MOE;
+   } else {
+     RIGHT_TIM->BDTR |= TIM_BDTR_MOE;
+@@ -197,7 +226,7 @@ void DMA1_Channel1_IRQHandler(void) {
+     /* Set motor inputs here */
+     rtU_Left.b_motEna     = enableFin;
+     rtU_Left.z_ctrlModReq = ctrlModReq;  
+-    rtU_Left.r_inpTgt     = pwml;
++    rtU_Left.r_inpTgt     = CART_OV_CUT ? 0 : pwml;   // тележка: ШИМ выключен перенапряжением — цель 0, интегратор iq не копится
+     rtU_Left.b_hallA      = hall_ul;
+     rtU_Left.b_hallB      = hall_vl;
+     rtU_Left.b_hallC      = hall_wl;
+@@ -243,7 +272,7 @@ void DMA1_Channel1_IRQHandler(void) {
+     /* Set motor inputs here */
+     rtU_Right.b_motEna      = enableFin;
+     rtU_Right.z_ctrlModReq  = ctrlModReq;
+-    rtU_Right.r_inpTgt      = pwmr;
++    rtU_Right.r_inpTgt      = CART_OV_CUT ? 0 : pwmr;   // тележка: см. выше
+     rtU_Right.b_hallA       = hall_ur;
+     rtU_Right.b_hallB       = hall_vr;
+     rtU_Right.b_hallC       = hall_wr;
+diff --git a/Src/main.c b/Src/main.c
+index d4ab511..b0f8a95 100644
+--- a/Src/main.c
++++ b/Src/main.c
+@@ -72,6 +72,12 @@ extern InputStruct input2[];            // input structure
+ 
+ extern int16_t speedAvg;                // Average measured speed
+ extern int16_t speedAvgAbs;             // Average measured speed in absolute
++#ifdef VARIANT_CART
++extern uint8_t cartLeverHeld;           // тележка: рычаг сжат (Src/util.c, cartControl())
++extern uint8_t cartBeepCnt, cartBeepFreq, cartBeepPat;   // тележка: какой писк просит cartControl()
++extern uint8_t cartOvActive;            // тележка: перенапряжение шины (Src/util.c) — писк выше «нет ручки»
++static uint16_t cartDeadCnt;            // тележка: сколько циклов батарея «мёртвая» при стоящей тележке
++#endif
+ extern volatile uint32_t timeoutCntGen; // Timeout counter for the General timeout (PPM, PWM, Nunchuk)
+ extern volatile uint8_t  timeoutFlgGen; // Timeout Flag for the General timeout (PPM, PWM, Nunchuk)
+ extern uint8_t timeoutFlgADC;           // Timeout Flag for for ADC Protection: 0 = OK, 1 = Problem detected (line disconnected or wrong ADC data)
+@@ -563,19 +569,39 @@ int main(void) {
+     poweroffPressCheck();
+ 
+     // ####### BEEP AND EMERGENCY POWEROFF #######
++    #ifdef VARIANT_CART
++    if (!(batVoltage < BAT_DEAD && speedAvgAbs < 20 && !cartLeverHeld)) { cartDeadCnt = 0; }
++    #endif
+     if (TEMP_POWEROFF_ENABLE && board_temp_deg_c >= TEMP_POWEROFF && speedAvgAbs < 20){  // poweroff before mainboard burns OR low bat 3
+       #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+         printf("Powering off, temperature is too high\r\n");
+       #endif
+       poweroff();
++    #ifdef VARIANT_CART
++    } else if (BAT_DEAD_ENABLE && batVoltage < BAT_DEAD && speedAvgAbs < 20 && !cartLeverHeld) {
++      // тележка: перед выключением по разряду — 10 с частого писка (при CART_COAST 0 пропадёт удержание на уклоне);
++      // пока кнопка «ехать» нажата, не выключаемся — человек держит ручку
++      if (++cartDeadCnt > 10000 / DELAY_IN_MAIN_LOOP) {
++        #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
++          printf("Powering off, battery voltage is too low\r\n");
++        #endif
++        poweroff();
++      }
++      beepCount(0, 3, 1);
++    #else
+     } else if ( BAT_DEAD_ENABLE && batVoltage < BAT_DEAD && speedAvgAbs < 20){
+       #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+         printf("Powering off, battery voltage is too low\r\n");
+       #endif
+       poweroff();
++    #endif
+     } else if (rtY_Left.z_errCode || rtY_Right.z_errCode) {                                           // 1 beep (low pitch): Motor error, disable motors
+       enable = 0;
+       beepCount(1, 24, 1);
++    #ifdef VARIANT_CART
++    } else if (cartOvActive) {                                                                        // тележка: перенапряжение (или плата завышает напряжение) — слышно и без ручки
++      beepCount(0, 16, 3);
++    #endif
+     } else if (timeoutFlgADC) {                                                                       // 2 beeps (low pitch): ADC timeout
+       beepCount(2, 24, 1);
+     } else if (timeoutFlgSerial) {                                                                    // 3 beeps (low pitch): Serial timeout
+@@ -591,6 +617,10 @@ int main(void) {
+     } else if (BEEPS_BACKWARD && (((cmdR < -50 || cmdL < -50) && speedAvg < 0) || MultipleTapBrake.b_multipleTap)) { // 1 beep fast (high pitch): Backward spinning motors
+       beepCount(0, 5, 1);
+       backwardDrive = 1;
++    #ifdef VARIANT_CART
++    } else if (cartBeepFreq) {                                                                        // тележка: «держи», «сдалась», «назад раньше рычага»
++      beepCount(cartBeepCnt, cartBeepFreq, cartBeepPat);
++    #endif
+     } else {  // do not beep
+       beepCount(0, 0, 0);
+       backwardDrive = 0;
+@@ -603,6 +633,11 @@ int main(void) {
+     if (abs(cmdL) > 50 || abs(cmdR) > 50) {
+       inactivity_timeout_counter = 0;
+     }
++    #ifdef VARIANT_CART
++    if (speedAvgAbs > 10) {             // тележка: пустая на ровном едет почти без момента — движение тоже считаем активностью,
++      inactivity_timeout_counter = 0;   // иначе через INACTIVITY_TIMEOUT минут она выключилась бы прямо на ходу
++    }
++    #endif
+ 
+     #if defined(CRUISE_CONTROL_SUPPORT) || defined(STANDSTILL_HOLD_ENABLE)
+       if ((abs(rtP_Left.n_cruiseMotTgt)  > 50 && rtP_Left.b_cruiseCtrlEna) || 
+@@ -611,6 +646,11 @@ int main(void) {
+       }
+     #endif
+ 
++    #ifdef VARIANT_CART
++    if (inactivity_timeout_counter > ((INACTIVITY_TIMEOUT * 60 - 10) * 1000) / (DELAY_IN_MAIN_LOOP + 1)) {
++      beepCount(0, 3, 1);               // тележка: последние 10 с перед выключением по бездействию — частый писк
++    }
++    #endif
+     if (inactivity_timeout_counter > (INACTIVITY_TIMEOUT * 60 * 1000) / (DELAY_IN_MAIN_LOOP + 1)) {  // rest of main loop needs maybe 1ms
+       #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+         printf("Powering off, wheels were inactive for too long\r\n");
+diff --git a/Src/util.c b/Src/util.c
+index b147301..1c9f138 100644
+--- a/Src/util.c
++++ b/Src/util.c
+@@ -610,6 +610,9 @@ void adcCalibLim(void) {
+  * - press the power button to confirm or wait for the 10 sec timeout
+  */
+ void updateCurSpdLim(void) {
++  #ifdef VARIANT_CART
++    return;   // тележка: пределы тока задаются только в config.h (двойное долгое нажатие кнопки питания не должно их менять)
++  #endif
+   calcAvgSpeed();
+   if (speedAvgAbs > 5) {    // do not enter this mode if motors are spinning
+     return;
+@@ -1029,7 +1032,13 @@ void handleTimeout(void) {
+     #endif
+ 
+     // In case of timeout bring the system to a Safe State
++    #ifdef VARIANT_CART
++    // Тележка: сбой АЦП ручки НЕ переводит в OPEN_MODE — cartControl() считает его «кнопка отпущена»: при CART_COAST 1
++    // момент 0 (накат), при CART_COAST 0 — остановка и удержание моторами.
++    if (timeoutFlgSerial || timeoutFlgGen) {
++    #else
+     if (timeoutFlgADC || timeoutFlgSerial || timeoutFlgGen) {
++    #endif
+       ctrlModReq  = OPEN_MODE;                                          // Request OPEN_MODE. This will bring the motor power to 0 in a controlled way
+       input1[inIdx].cmd  = 0;
+       input2[inIdx].cmd  = 0;
+@@ -1045,6 +1054,400 @@ void handleTimeout(void) {
+     }
+ }
+ 
++#ifdef VARIANT_CART
++ /* =========================== Электротележка (VARIANT_CART) ===========================
++ * Вызывается в конце readCommand() каждый цикл (~5 мс).
++ * Вход:  input1.raw   — колёсико скорости (PA2), сырое 0..4095 (переменный резистор, ≈2020..4010);
++ *        input2.raw   — кнопка «ехать» (рычаг) / «назад» (PA3), сырое 0..4095;  timeoutFlgADC — обрыв колёсика / замыкание рычага;
++ *        cartBtnPressed — кнопка питания нажата (из poweroffPressCheck()), считается как «рычаг отпущен».
++ * Выход: input2.cmd   — команда напряжения в рабочем синусоидальном режиме или момент в стендовом FOC.
++ *        input1.cmd   — 0: поворачивает человек ручкой тележки.
++ *        Ниже режим TRQ и связанные с ним настройки относятся к стендовой FOC-сборке:
++ *        rtP_*.n_max  — запасной потолок скорости каждого колеса (встроенная защита контроллера);
++ *        rtP_*.b_cruiseCtrlEna / n_cruiseMotTgt — только при CART_COAST 0: остановка и удержание, контроллер сам
++ *        уходит в режим скорости с целью, которая плавно сводится к 0 об/мин (тот же механизм, что STANDSTILL_HOLD).
++ *        При CART_COAST 1 (по умолчанию) отпущенная кнопка = момент 0: тележка катится сама;
++ *        cartLeverHeld, cartBeep* — для main.c (не выключаться при сжатом рычаге; какой писк нужен).
++ * Почему не только n_max: встроенный ограничитель скорости в режиме момента запаздывает и даёт заброс
++ * (известная проблема EFeru #132), а регулятор средней скорости работает плавно и одинаково для пустой и гружёной.
++ */
++#define CART_REL    0   // рычаг отпущен
++#define CART_FWD    1   // рычаг сжат — вперёд
++#define CART_REV    2   // рычаг сжат + кнопка «назад»
++#define CART_FAULT  3   // замыкание провода на +3,3 или значение между полосами
++
++// км/ч×10 → об/мин×256 колеса (n_max у контроллера — об/мин×16)
++#define CART_RPM256(kmh10)  ((int32_t)(kmh10) * 25600000L / (1885L * CART_WHEEL_DIAM_MM / 10))
++// «км/ч×10 в секунду» → шаг об/мин×256 за один цикл
++#define CART_STEP256(kmh10_s) (CART_RPM256(kmh10_s) * DELAY_IN_MAIN_LOOP / 1000)
++#define CART_LOOPS(ms)      ((ms) / DELAY_IN_MAIN_LOOP)
++
++extern volatile int16_t batVoltageFast;    // напряжение батареи, сырое АЦП, фильтр ≈0,5 мс (Src/bldc.c) — перенапряжение
++uint8_t  cartLeverHeld  = 0;               // рычаг сжат (main.c: не выключаться по разряду батареи)
++uint8_t  cartOvActive   = 0;               // перенапряжение шины, мягкая ступень (main.c: свой писк)
++uint8_t  cartBtnPressed = 0;               // кнопка питания нажата (ставит poweroffPressCheck())
++uint8_t  cartBeepCnt    = 0;               // писк, который просит тележка (main.c → beepCount), 0 = тихо
++uint8_t  cartBeepFreq   = 0;
++uint8_t  cartBeepPat    = 0;
++  #ifdef CART_DIAG_TEST
++// Только специальная стендовая сборка. Запуск — однократный ключ в RAM через SWD, после включения сама не едет.
++volatile uint32_t cartDiagTestRequest = 0;
++volatile uint32_t cartDiagTestLevel = 120; // 40..200 промилле; уровень защёлкивается при запуске
++volatile uint32_t cartDiagTestLeftMs = 0;
++  #endif
++static uint16_t cartBeepLeft = 0;          // сколько циклов ещё пищать
++
++static void cartBeep(uint8_t cnt, uint8_t freq, uint8_t pat, uint16_t ms) {
++  cartBeepCnt  = cnt;
++  cartBeepFreq = freq;
++  cartBeepPat  = pat;
++  cartBeepLeft = CART_LOOPS(ms);
++}
++
++static uint8_t cartLever(int16_t raw) {
++  if (raw <= CART_LEVER_REL_HI) return CART_REL;
++  if (raw >= CART_LEVER_FWD_LO && raw <= CART_LEVER_FWD_HI) return CART_FWD;
++  if (CART_REVERSE && raw >= CART_LEVER_REV_LO && raw <= CART_LEVER_REV_HI) return CART_REV;
++  return CART_FAULT;                       // без кнопки «назад» (CART_REVERSE 0) её полоса — тоже сбой
++}
++
++static void cartControl(void) {
++  static uint8_t  handle    = CART_FAULT;  // состояние ручки после антидребезга (до первого замера — «неизвестно»)
++  static uint8_t  candidate = CART_FAULT;
++  static uint8_t  candCnt   = 0;
++  static uint8_t  armed     = 0;           // 1 = рычаг был отпущен после включения / сбоя / отключения моторов / «сдалась»
++  static uint8_t  revOk     = 0;           // 1 = «назад» разрешён: сначала рычаг, потом кнопка, тележка стояла
++  static uint8_t  drive     = CART_REL;    // что делаем сейчас: CART_REL (тормозим/держим), CART_FWD, CART_REV
++  static uint8_t  first     = 1;
++  static int32_t  trq16     = 0;           // момент «по ходу движения», ‰ от I_MOT_MAX ×16
++  static int32_t  integ12   = 0;           // интегральная часть регулятора скорости, ‰ ×4096
++  static int32_t  hold16    = 0;           // момент, которым колёса держали тележку (для трогания без отката), ‰ ×16
++  static int32_t  vref256   = 0;           // заданная скорость (растёт плавно), об/мин ×256, по ходу движения
++  static int32_t  holdL256  = 0;           // цели удержания колёс, об/мин ×256 (каждое колесо в своих знаках)
++  static int32_t  holdR256  = 0;
++  static uint8_t  gapCnt    = 0;           // сколько циклов подряд рычаг между полосами
++  static uint16_t stallCnt  = 0;           // сколько циклов момент на пределе, а тележка стоит
++  static uint16_t downCnt   = 0;           // сколько циклов подряд моторы тормозят
++  static uint16_t upCnt     = 0;           // сколько циклов подряд моторы тянут
++  static uint8_t  downCap   = 0;           // 1 = спуск: потолок CART_SPEED_DOWN_KMH10
++  static uint8_t  fade      = 0;           // 1 = «сдалась» при накате: тяга уходит плавно (CART_GIVEUP_FADE_MS)
++  static int32_t  fadeSgn   = 1;           // знак команды той поездки, тягу которой плавно снимаем
++
++  // Колёсико — переменный резистор R: raw = TOP·10к/(10к+R), доля поворота = 1 − R/10к = 2 − TOP/raw (линейно по углу)
++  int32_t kraw = MAX((int32_t)input1[inIdx].raw, 1);
++  int32_t knob = CLAMP(2000 - 1000L * CART_KNOB_RAW_TOP / kraw, 0, 1000);
++  input1[inIdx].cmd = 0;                   // руления моторами нет (и не мешаем проверке «вход≈0» при включении в main.c)
++
++  if (cartBeepLeft && --cartBeepLeft == 0) { cartBeepCnt = cartBeepFreq = cartBeepPat = 0; }
++
++  // ---- 0. Перенапряжение шины (CART_OV_* в config.h): моторы тормозят, а батарея ток не принимает ----
++  // Выше CART_OV_SOFT_ADC тормозить моторами нельзя: момент только «по ходу», потолки колёс сняты — тележка катится
++  // сама, держит человек. Ниже CART_OV_SOFT_OFF_ADC дольше CART_OV_HOLD_MS — всё как было. Пока действует — писк.
++  // Жёсткая ступень (ШИМ выключен) — в прерывании, Src/bldc.c.
++  static uint8_t  ov    = 0;
++  static uint16_t ovCnt = 0;
++  if (batVoltageFast > CART_OV_SOFT_ADC) {
++    ov    = 1;
++    ovCnt = 0;
++  } else if (ov && batVoltageFast < CART_OV_SOFT_OFF_ADC) {
++    if (++ovCnt >= CART_LOOPS(CART_OV_HOLD_MS)) { ov = 0; ovCnt = 0; }
++  } else {
++    ovCnt = 0;
++  }
++  if (ov) { cartBeep(0, 16, 3, 300); }
++  cartOvActive = ov;                       // main.c: этот писк — выше «нет ручки», чтобы его было слышно и на стенде
++
++  // ---- 1. Ручка: полоса + антидребезг ----
++  uint8_t now = timeoutFlgADC ? CART_FAULT : cartLever(input2[inIdx].raw);
++  #ifdef CART_SIN_DRIVE
++  if (!IN_RANGE(input1[inIdx].raw, input1[inIdx].min - ADC_PROTECT_THRESH,
++                                 input1[inIdx].max + ADC_PROTECT_THRESH)) {
++    now = CART_FAULT; // снимаем тягу сразу; штатный таймер АЦП определяет момент выдачи ошибки
++  }
++  #endif
++  if (now == candidate) {
++    if (candCnt < CART_DEBOUNCE) { candCnt++; }
++  } else {
++    candidate = now;
++    candCnt   = 0;
++  }
++  if (candCnt >= CART_DEBOUNCE && handle != candidate) {
++    if (candidate == CART_REV) {
++      if (handle == CART_FWD && armed && ABS(speedAvg) < CART_DIRCHG_RPM) {
++        revOk = 1;                         // сначала рычаг, потом «назад», тележка стоит — можно назад
++      } else {
++        if (handle != CART_FWD) { cartBeep(2, 24, 1, 1500); }   // «назад» раньше рычага (залипла, вода) — 2 гудка
++        armed = 0;                         // «назад» на ходу = стоп; ехать снова — только после отпускания рычага
++      }
++    }
++    handle = candidate;
++  }
++  if (handle != CART_REV) { revOk = 0; }
++
++  // Значение «между полосами» дольше ~0,5 с (плохой контакт, не те резисторы) — тоже сбой: 2 гудка, как при обрыве
++  if (now == CART_FAULT && !timeoutFlgADC) {
++    if (gapCnt < ADC_PROTECT_TIMEOUT) { gapCnt++; } else { timeoutFlgADC = 1; }
++  } else {
++    gapCnt = 0;
++  }
++
++  uint8_t released = (handle == CART_REL);
++  #ifdef CART_SIN_DRIVE
++  released = released && now == CART_REL;
++  #endif
++  if (released && !cartBtnPressed)                 { armed = 1; }  // рычаг честно отпущен
++  if (handle == CART_FAULT || !enable || cartBtnPressed) { armed = 0; }  // сбой/моторы выключены/кнопка — снова отпустить рычаг
++  if (ABS(speedAvg) > (CART_RPM256(CART_RUNAWAY_KMH10) >> 8)) {          // разогнало под горку
++    if (armed) { cartBeep(0, 5, 1, 1500); }
++    if (!CART_COAST) { armed = 0; }      // удержание; при накате снять тягу = покатиться ещё быстрее — не снимаем
++  }
++  cartLeverHeld = (handle == CART_FWD || handle == CART_REV);
++
++  #ifdef CART_DIAG
++  // cart-diag.bin: без регулятора — кнопка нажата → напряжение с колёсика, отпущена/сбой → плавно в 0.
++  // Защиты ручки выше (зажата при включении, обрыв, замыкание) работают так же, как в рабочей прошивке.
++  {
++    static int32_t v16 = 0;                // напряжение, ‰ ×16
++    #ifdef CART_DIAG_TEST
++    static uint32_t started = 0;
++    static uint32_t testLevel = 120;
++    uint32_t request = cartDiagTestRequest;
++    cartDiagTestRequest = 0;
++    if (request == 0x43543031 && !cartDiagTestLeftMs) {
++      testLevel = MIN(MAX(cartDiagTestLevel, 40), 200);
++      started = HAL_GetTick();
++      cartDiagTestLeftMs = 30000;
++    } else if (request) {
++      cartDiagTestLeftMs = 0;             // любой другой ненулевой ключ — отмена
++    }
++    if (cartDiagTestLeftMs) {
++      uint32_t elapsed = HAL_GetTick() - started;
++      cartDiagTestLeftMs = elapsed < 30000 ? 30000 - elapsed : 0;
++      if (!enable || cartBtnPressed || ov || rtY_Left.z_errCode || rtY_Right.z_errCode || timeoutFlgGen) {
++        cartDiagTestLeftMs = 0;           // сбой/кнопка — отмена, не автоматический повтор
++      }
++    }
++    int32_t tgt16 = cartDiagTestLeftMs > 1000 ? testLevel * 16 : 0;  // последняя секунда — плавный спад
++    if (!cartDiagTestLeftMs) v16 = 0;
++    else v16 = STEP(v16, tgt16, (testLevel * 16 * DELAY_IN_MAIN_LOOP + 999) / 1000);
++    cartLeverHeld = cartDiagTestLeftMs != 0;
++    #else
++    int32_t tgt16 = (armed && enable && handle == CART_FWD)
++                  ? ((int32_t)CART_DIAG_VLT_MIN + knob * (CART_DIAG_VLT_MAX - CART_DIAG_VLT_MIN) / 1000) << 4
++                  : 0;
++    v16 = STEP(v16, tgt16, (int32_t)16000 * DELAY_IN_MAIN_LOOP / CART_DIAG_RAMP_MS);
++    #endif
++    rtP_Left.b_cruiseCtrlEna  = 0;
++    rtP_Right.b_cruiseCtrlEna = 0;
++    input2[inIdx].cmd = (int16_t)(v16 / 16);
++    return;
++  }
++  #elif defined(CART_SIN_DRIVE)
++  {
++    static int32_t v16 = 0;              // команда напряжения, ‰ ×16
++    static int32_t trim256 = 0;          // медленная добавка при езде под нагрузкой, ‰ ×256
++    static uint8_t speedCut = 0;
++    static uint16_t stoppedLoops = 0;
++
++    if (now == CART_FAULT || ov || rtY_Left.z_errCode || rtY_Right.z_errCode) {
++      armed = 0;                        // повторный пуск только после отпускания
++    }
++
++    if (!armed || handle != CART_FWD || now != CART_FWD) {
++      v16 = 0;
++      trim256 = 0;
++      stoppedLoops = 0;
++    } else {
++      int32_t kmh10 = CART_SPEED_MIN_KMH10 + knob * (CART_SPEED_MAX_KMH10 - CART_SPEED_MIN_KMH10) / 1000;
++      int32_t maxKmh10 = CART_SPEED_MAX_KMH10;
++      if (batVoltage < BAT_LVL1) {
++        maxKmh10 = MIN(maxKmh10, CART_SPEED_LOWBAT_KMH10);
++      }
++      kmh10 = MIN(kmh10, maxKmh10);
++
++      int32_t targetRpm = (CART_RPM256(kmh10) + 128) >> 8;
++      int32_t speedLimit = MIN(targetRpm + CART_SIN_SPEED_BAND_RPM, CART_RPM256(maxKmh10) >> 8);
++      int32_t wheelLimit = MIN(targetRpm * 5 / 4 + (CART_RPM256(5) >> 8), N_MOT_MAX);
++      int32_t speed = ABS(speedAvg);
++      int32_t fasterWheel = MAX(ABS(rtY_Left.n_mot), ABS(rtY_Right.n_mot));
++      int32_t margin = speedCut ? CART_SIN_SPEED_BAND_RPM : 0;
++      speedCut = speed >= speedLimit - margin || fasterWheel >= wheelLimit - margin;
++
++      if (speed > ((CART_RPM256(kmh10 + CART_OVER_KMH10)) >> 8)) {
++        cartBeep(0, 5, 1, 300);
++      }
++
++      if (speedCut) {
++        v16 = 0;                        // силовые выходы отключаются в bldc.c
++        trim256 = 0;
++        stoppedLoops = 0;
++      } else {
++        // Холостой ход YK99: около 48‰ дают 21 об/мин, 120‰ дают около 69 об/мин.
++        // При отставании больше 4 об/мин добавляем напряжение медленно; вблизи задания добавка уходит.
++        int32_t base = (19 + 14 * targetRpm / 10) * CART_OV_ADC(4050) /
++                       MAX(batVoltageFast, CART_OV_ADC(3600));
++        base = MIN(base, CART_SIN_MAX_VLT);
++        int32_t error = targetRpm - speed - CART_SIN_SPEED_BAND_RPM;
++        int32_t target16 = base * 16 + trim256 / 16;
++        v16 = STEP(v16, target16, CART_SIN_RAMP * 16 * DELAY_IN_MAIN_LOOP / 1000);
++        if (v16 >= base * 16 || error < 0) {
++          trim256 = CLAMP(trim256 + error * 256 * DELAY_IN_MAIN_LOOP / 1000,
++                          0, (CART_SIN_MAX_VLT - base) * 256);
++        }
++
++        if (fasterWheel >= CART_STALL_RPM) {
++          stoppedLoops = 0;
++        } else if (++stoppedLoops >= CART_LOOPS(CART_STALL_MS)) {
++          armed = 0;
++          v16 = 0;
++          cartBeep(1, 24, 1, 1500);
++        }
++      }
++    }
++    input2[inIdx].cmd = (int16_t)(v16 / 16);
++    return;
++  }
++  #endif
++
++  // ---- 2. Чего хочет человек ----
++  int16_t nL  = rtY_Left.n_mot;
++  int16_t nR  = rtY_Right.n_mot;
++  uint8_t want = (armed && enable && (handle == CART_FWD || (handle == CART_REV && revOk))) ? handle : CART_REL;
++  if (!CART_COAST && want == CART_FWD && speedAvg < -CART_DIRCHG_RPM) { want = CART_REL; }  // катимся назад — сначала остановка
++  if (want == CART_REV && speedAvg >  CART_DIRCHG_RPM) { want = CART_REL; }  // катимся вперёд — сначала остановка
++
++  // ---- 3. Переходы ----
++  if (want != drive || first) {
++    if (want == CART_REL) {
++      // Остановка: цель удержания = текущая скорость каждого колеса, дальше плавно сводим к 0
++      holdL256 = (int32_t)nL * 256;
++      holdR256 = (int32_t)nR * 256;
++      fadeSgn  = (drive == CART_REV) ? -1 : 1;
++      hold16   = CART_COAST ? 0 : fadeSgn * trq16;   // в знаках команды (вперёд = +)
++      rtP_Left.b_cruiseCtrlEna  = !CART_COAST && !ov;  // накат: режим момента с нулём; иначе — удержание скоростью 0
++      rtP_Right.b_cruiseCtrlEna = !CART_COAST && !ov;  // (перенапряжение: без удержания — оно тормозит)
++    } else {
++      // Трогание: регулятор начинает с того момента, которым колёса держали тележку (на подъёме не откатится),
++      // а заданная скорость — с текущей (разгон дальше плавный)
++      int32_t sgn   = (want == CART_FWD) ? 1 : -1;
++      int32_t hiLim = (int32_t)((want == CART_FWD) ? CART_TRQ_FWD : CART_TRQ_REV) << 4;
++      trq16   = CLAMP(sgn * hold16, -((int32_t)CART_TRQ_BRK << 4), hiLim);
++      integ12 = trq16 * 256;
++      vref256 = MAX(sgn * (int32_t)speedAvg, 0) << 8;
++      fade    = 0;
++      rtP_Left.b_cruiseCtrlEna  = 0;
++      rtP_Right.b_cruiseCtrlEna = 0;
++    }
++    drive    = want;
++    first    = 0;
++    stallCnt = 0;
++  }
++
++  // ---- 4. Каждый цикл ----
++  if (drive == CART_REL && CART_COAST) {
++    // Накат: тяги нет, тормоза нет — тележка катится сама, как без моторов. Потолок колеса — только абсолютный
++    // N_MOT_MAX: потолок последней поездки контроллер держал бы, урезая напряжение, то есть подтормаживал бы
++    rtP_Left.b_cruiseCtrlEna  = 0;
++    rtP_Right.b_cruiseCtrlEna = 0;
++    rtP_Left.n_max  = (int16_t)(N_MOT_MAX << 4);
++    rtP_Right.n_max = rtP_Left.n_max;
++    if (fade && trq16 > 0 && !ov) {        // «сдалась» на крутом подъёме: тягу снимаем плавно, груз не бросаем
++                                           // (тележка при этом откатывается — тяга тормозит; перенапряжение — сразу 0)
++      trq16 = STEP(trq16, 0, (int32_t)16000 * DELAY_IN_MAIN_LOOP / CART_GIVEUP_FADE_MS);
++    } else {
++      trq16 = 0;
++      fade  = 0;
++    }
++    hold16 = fadeSgn * trq16;              // нажали снова, пока тяга уходит, — регулятор начнёт с неё, без провала
++    input2[inIdx].cmd = (int16_t)(fadeSgn * trq16 / 16);
++  } else if (drive == CART_REL) {
++    if (!enable || ov) {                   // моторы выключены / перенапряжение — цель просто следует за колесом
++      holdL256 = (int32_t)nL * 256;
++      holdR256 = (int32_t)nR * 256;
++    }
++    rtP_Left.b_cruiseCtrlEna  = !ov;       // перенапряжение: без удержания (оно тормозит), момент 0 — катится
++    rtP_Right.b_cruiseCtrlEna = !ov;
++    rtP_Left.n_max  = (int16_t)(N_MOT_MAX << 4);   // в удержании потолок не нужен; не оставлять 1000 после перенапряжения
++    rtP_Right.n_max = rtP_Left.n_max;
++    holdL256 = STEP(holdL256, 0, CART_STEP256(CART_STOP_KMH10_S));
++    holdR256 = STEP(holdR256, 0, CART_STEP256(CART_STOP_KMH10_S));
++    rtP_Left.n_cruiseMotTgt  = (int16_t)(holdL256 / 256);
++    rtP_Right.n_cruiseMotTgt = (int16_t)(holdR256 / 256);
++
++    // Каким моментом колёса сейчас держат тележку (измеренный iq → ‰ от i_max ×16), сглаживаем
++    int32_t eqL =  (int32_t)rtY_Left.iq  * 16000 / rtP_Left.i_max;    // левый мотор: pwml = +cmd
++    int32_t eqR = -(int32_t)rtY_Right.iq * 16000 / rtP_Right.i_max;   // правый мотор: pwmr = -cmd
++    #ifdef INVERT_L_DIRECTION
++      eqL = -eqL;
++    #endif
++    #ifdef INVERT_R_DIRECTION
++      eqR = -eqR;
++    #endif
++    hold16 += ((eqL + eqR) / 2 - hold16) / 8;
++
++    trq16 = 0;
++    input2[inIdx].cmd = 0;                 // в режиме удержания момент не используется
++  } else {
++    // Всё ниже — «по ходу движения»: для заднего хода знак переворачиваем только на выходе
++    int32_t sgn   = (drive == CART_FWD) ? 1 : -1;
++    int32_t hiLim = (int32_t)((drive == CART_FWD) ? CART_TRQ_FWD : CART_TRQ_REV) << 4;   // тянуть
++    int32_t loLim = -((int32_t)CART_TRQ_BRK << 4);                                        // тормозить
++    if (ov) {                              // перенапряжение: не тормозить; тележку катит назад — и не тянуть (это тоже торможение)
++      loLim = 0;
++      if (sgn * (int32_t)speedAvg < -CART_STALL_RPM) { hiLim = 0; }
++    }
++
++    // Спуск: моторы тормозят дольше CART_DOWN_MS — потолок 4 км/ч, пока снова не потянут дольше CART_DOWN_OFF_MS
++    if (trq16 < -(30 << 4))      { upCnt = 0; if (downCnt < 60000) { downCnt++; } }
++    else if (trq16 > (30 << 4))  { downCnt = 0; if (upCnt < 60000) { upCnt++; } }
++    if (downCnt >= CART_LOOPS(CART_DOWN_MS))    { downCap = 1; }
++    if (upCnt   >= CART_LOOPS(CART_DOWN_OFF_MS)) { downCap = 0; }
++
++    // Заданная скорость: колёсико (вперёд) или постоянная (назад); к ней — плавно (разгон и сброс)
++    int32_t kmh10 = (drive == CART_FWD)
++                  ? CART_SPEED_MIN_KMH10 + knob * (CART_SPEED_MAX_KMH10 - CART_SPEED_MIN_KMH10) / 1000
++                  : CART_SPEED_REV_KMH10;
++    if (downCap)                { kmh10 = MIN(kmh10, CART_SPEED_DOWN_KMH10); }
++    if (batVoltage < BAT_LVL1)  { kmh10 = MIN(kmh10, CART_SPEED_LOWBAT_KMH10); }   // садится батарея
++    int32_t tgt256 = MIN(CART_RPM256(kmh10), (int32_t)N_MOT_MAX << 8);
++    vref256 = STEP(vref256, tgt256, (tgt256 > vref256) ? CART_STEP256(CART_ACCEL_KMH10_S) : CART_STEP256(CART_STOP_KMH10_S));
++
++    // ПИ-регулятор средней скорости → момент (одинаковый на оба колеса)
++    int32_t err256 = vref256 - sgn * (int32_t)speedAvg * 256;
++    integ12 += (int32_t)CART_KI * err256 * DELAY_IN_MAIN_LOOP * 16 / 1000;
++    integ12  = CLAMP(integ12, loLim * 256, hiLim * 256);                   // без «накопления» сверх пределов
++    int32_t u16 = CLAMP((int32_t)CART_KP * err256 / 16 + integ12 / 256, loLim, hiLim);
++    trq16 = STEP(trq16, u16, (int32_t)16000 * DELAY_IN_MAIN_LOOP / CART_TRQ_SLEW_MS);   // без рывков
++    trq16 = CLAMP(trq16, loLim, hiLim);    // перенапряжение — сразу, без плавности (иначе тормоз уходил бы до 0,35 с)
++
++    // «Упёрлась — сдалась»: тянем на пределе, а тележка стоит дольше CART_STALL_MS — тягу снять (при накате — плавно),
++    // 1 гудок; при CART_COAST 0 — удержание
++    if (trq16 >= hiLim * 9 / 10 && ABS(speedAvg) < CART_STALL_RPM) {
++      if (++stallCnt >= CART_LOOPS(CART_STALL_MS)) { armed = 0; fade = CART_COAST; stallCnt = 0; cartBeep(1, 24, 1, 1500); }
++    } else {
++      stallCnt = 0;
++    }
++
++    // Быстрее заданной на CART_OVER_KMH10 — частый писк «держи»
++    if (sgn * (int32_t)speedAvg * 256 > tgt256 + CART_RPM256(CART_OVER_KMH10)) { cartBeep(0, 5, 1, 300); }
++
++    // Запасной потолок каждого колеса (встроенная защита): заданная ×1,25 + ~0,5 км/ч, не выше N_MOT_MAX.
++    // Берём большую из «текущей заданной» и «конечной», чтобы при сбросе колёсика потолок не тормозил резче регулятора.
++    int32_t ref256  = MAX(vref256, tgt256);
++    int32_t ceil256 = MIN(ref256 + ref256 / 4 + CART_RPM256(5), (int32_t)N_MOT_MAX << 8);
++    rtP_Left.n_max  = (int16_t)(ceil256 >> 4);                              // об/мин ×16
++    rtP_Right.n_max = rtP_Left.n_max;
++
++    input2[inIdx].cmd = (int16_t)(sgn * trq16 / 16);
++  }
++
++  if (ov) {                                // перенапряжение: потолки колёс сняты — у потолка контроллер тормозил бы
++    rtP_Left.n_max  = (int16_t)(CART_OV_NMAX << 4);
++    rtP_Right.n_max = rtP_Left.n_max;
++  }
++}
++#endif
++
+  /*
+  * Function to calculate the command to the motors. This function also manages:
+  * - timeout detection
+@@ -1081,6 +1484,10 @@ void readCommand(void) {
+     #if defined(CRUISE_CONTROL_SUPPORT) && (defined(SUPPORT_BUTTONS) || defined(SUPPORT_BUTTONS_LEFT) || defined(SUPPORT_BUTTONS_RIGHT))
+         cruiseControl(button1);                                           // Cruise control activation/deactivation
+     #endif
++
++    #ifdef VARIANT_CART
++        cartControl();                                                    // Тележка: ручка → момент, потолок скорости, удержание
++    #endif
+ }
+ 
+ 
+@@ -1576,7 +1983,25 @@ void poweroff(void) {
+ 
+ 
+ void poweroffPressCheck(void) {
+-  #if !defined(VARIANT_HOVERBOARD) && !defined(VARIANT_TRANSPOTTER)
++  #if defined(VARIANT_CART)
++    // Тележка: кнопку НЕ ждём в цикле (иначе, пока посылка давит на кнопку, рычаг не читается, а моторы держат
++    // последний момент). Нажата = «кнопка «ехать» отпущена» (cartControl()). Выключение — после отпускания,
++    // если нажатие было дольше 80 мс, тележка стоит и рычаг не сжат. Долгое и двойное нажатие ничего не делают.
++    static uint16_t cnt_press = 0;
++    if (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN)) {
++      cartBtnPressed = 1;
++      if (cnt_press < 60000) { cnt_press++; }
++    } else {
++      if (cnt_press > 80 / DELAY_IN_MAIN_LOOP && speedAvgAbs < 10 && !cartLeverHeld) {
++        #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
++          printf("Powering off, button has been pressed\r\n");
++        #endif
++        poweroff();
++      }
++      cnt_press      = 0;
++      cartBtnPressed = 0;
++    }
++  #elif !defined(VARIANT_HOVERBOARD) && !defined(VARIANT_TRANSPOTTER)
+     if(HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN)) {
+       uint16_t cnt_press = 0;
+       while(HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN)) {
+diff --git a/platformio.ini b/platformio.ini
+index d7612db..70b3c6c 100644
+--- a/platformio.ini
++++ b/platformio.ini
+@@ -211,3 +211,66 @@ build_flags =
+     -D VARIANT_SKATEBOARD
+     
+ ;================================================================
++
++;================================================================
++; Электротележка aisheff.ru: VARIANT_CART (см. Inc/config.h и cartControl() в Src/util.c).
++; Тулчейн GCC 12.3 закреплён: у штатного 7.2.1 для macOS только сборка под Intel (на Apple Silicon без Rosetta не запускается).
++
++[env:VARIANT_CART]
++platform        = ststm32@20.0.0
++platform_packages = platformio/toolchain-gccarmnoneeabi@1.120301.0
++framework       = stm32cube
++board           = genericSTM32F103RC
++debug_tool      = stlink
++upload_protocol = stlink
++
++build_flags =
++    -DUSE_HAL_DRIVER
++    -DSTM32F103xE
++    -T./STM32F103RCTx_FLASH.ld
++    -lc
++    -lm
++    -g -ggdb
++    -D VARIANT_CART
++
++[env:VARIANT_CART_BENCH]
++extends         = env:VARIANT_CART
++build_flags =
++    ${env:VARIANT_CART.build_flags}
++    -D CART_BENCH
++
++; Самый первый пуск на стенде: синус + напряжение, ток 4 А — проверка Холлов и фаз до FOC (Inc/config.h, CART_DIAG)
++[env:VARIANT_CART_DIAG]
++extends         = env:VARIANT_CART
++build_flags =
++    ${env:VARIANT_CART.build_flags}
++    -D CART_DIAG
++
++; Запасные рабочие сборки на случай, если мотор-колесо встало на тележку зеркально (на стенде крутится не в ту сторону)
++[env:VARIANT_CART_INV_L]
++extends         = env:VARIANT_CART
++build_flags =
++    ${env:VARIANT_CART.build_flags}
++    -D INVERT_L_DIRECTION
++
++[env:VARIANT_CART_INV_R]
++extends         = env:VARIANT_CART
++build_flags =
++    ${env:VARIANT_CART.build_flags}
++    -D INVERT_R_DIRECTION
++
++[env:VARIANT_CART_INV_LR]
++extends         = env:VARIANT_CART
++build_flags =
++    ${env:VARIANT_CART.build_flags}
++    -D INVERT_L_DIRECTION
++    -D INVERT_R_DIRECTION
++
++;================================================================
++
++; Одноразовый стендовый тест по запросу владельца: 30 с, без пульта, запуск только ключом SWD.
++[env:VARIANT_CART_DIAG_TEST]
++extends = env:VARIANT_CART_DIAG
++build_flags =
++    ${env:VARIANT_CART_DIAG.build_flags}
++    -D CART_DIAG_TEST

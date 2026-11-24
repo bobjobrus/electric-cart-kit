@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="956" viewBox="0 0 1200 956" role="img" aria-labelledby="title desc">
+  <title id="title">Распайка кнопки и регулятора электротележки</title>
+  <desc id="desc">У платы YK99 четыре цепи. Питание с J4 №4 проходит через 220 Ом, PA2 и PA3 идут с разъёма датчиков, минус с J4 №2. После 220 Ом подключён конденсатор 100 нФ на минус. PA2 подключён к минусу через параллельные 10 кОм и 100 нФ, PA3 через параллельные 4,7 кОм и 100 нФ. В ручке питание идёт на крайний вывод A потенциометра и на рабочий контакт кнопки через 4,7 кОм. Второй рабочий контакт идёт на PA3. Средний B и второй крайний C соединены и идут на PA2. Выводы подсветки свободны, конец жилы минуса на ручке изолирован.</desc>
+  <style>
+    text { font-family: system-ui, -apple-system, sans-serif; fill: #182c3a; }
+    .title { font-size: 38px; font-weight: 760; }
+    .heading { font-size: 23px; font-weight: 750; }
+    .label { font-size: 18px; font-weight: 700; }
+    .value { font-size: 16px; font-weight: 720; text-anchor: middle; }
+    .small { font-size: 16px; fill: #3c5667; }
+    .panel { fill: #fff; stroke: #cbd8df; stroke-width: 1.5; }
+    .wire { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .power { stroke: #b62c36; }
+    .ground { stroke: #344555; }
+    .speed { stroke: #1c659c; }
+    .go { stroke: #9a500a; }
+    .red { fill: #a52531; }
+    .blue { fill: #1a5d91; }
+    .amber { fill: #8a4909; }
+    .resistor { fill: #fff7e5; stroke: #87662b; stroke-width: 1.5; }
+    .capacitor { fill: #fff; stroke: #62778a; stroke-width: 1.5; }
+    .terminal { fill: #fff; stroke-width: 4; }
+    .hardware { fill: #eef3f6; stroke: #cbd8df; stroke-width: 1.5; }
+    .unused { fill: #fff; stroke: #708594; stroke-width: 2; }
+  </style>
+  <rect width="1200" height="956" fill="#eef3f6"/>
+  <text x="34" y="55" class="title">Распайка кнопки и регулятора</text>
+  <text x="36" y="89" class="small">YK99 · LAS3D-16F-10EM · JBR-BC-103-R на 10 кОм</text>
+  <text x="1165" y="89" class="small" text-anchor="end">До ручки 170 см · заготовка 210 см с запасом</text>
+
+  <rect x="34" y="111" width="1132" height="379" rx="16" class="panel"/>
+  <text x="60" y="150" class="heading">У платы YK99</text>
+  <text x="1140" y="150" class="small" text-anchor="end">Подпишите жилы с двух концов · цвета на схеме условные</text>
+  <path d="M58 168H1142" stroke="#e1e9ed"/>
+  <g id="supply">
+    <text x="60" y="203" class="label">J4 №4*</text>
+    <path d="M200 197H902 M452 197V231H479" class="wire power"/>
+    <rect x="248" y="181" width="134" height="32" rx="5" class="resistor"/>
+    <text x="315" y="203" class="value">R1 · 220 Ом</text>
+    <circle cx="452" cy="197" r="6" class="red"/>
+    <rect x="479" y="216" width="151" height="30" rx="5" class="capacitor"/>
+    <text x="554" y="236" class="value">C1 · 100 нФ</text>
+    <path d="M630 231H655" class="wire ground"/>
+    <text x="668" y="237" class="small">на минус</text>
+    <text x="927" y="203" class="label red">Питание пульта</text>
+  </g>
+  <g id="speed">
+    <text x="60" y="286" class="label">PA2 шлейфа*</text>
+    <path d="M200 280H902 M286 280V315H313 M579 280V315H606" class="wire speed"/>
+    <circle cx="286" cy="280" r="6" class="blue"/>
+    <circle cx="579" cy="280" r="6" class="blue"/>
+    <rect x="313" y="300" width="128" height="30" rx="5" class="resistor"/>
+    <text x="377" y="320" class="value">R2 · 10 кОм</text>
+    <path d="M441 315H463" class="wire ground"/>
+    <text x="475" y="321" class="small">на минус</text>
+    <rect x="606" y="300" width="135" height="30" rx="5" class="capacitor"/>
+    <text x="674" y="320" class="value">C2 · 100 нФ</text>
+    <path d="M741 315H763" class="wire ground"/>
+    <text x="775" y="321" class="small">на минус</text>
+    <text x="927" y="286" class="label blue">PA2 · скорость</text>
+  </g>
+  <g id="go">
+    <text x="60" y="369" class="label">PA3 шлейфа*</text>
+    <path d="M200 363H902 M286 363V397H313 M579 363V397H606" class="wire go"/>
+    <circle cx="286" cy="363" r="6" class="amber"/>
+    <circle cx="579" cy="363" r="6" class="amber"/>
+    <rect x="313" y="382" width="128" height="30" rx="5" class="resistor"/>
+    <text x="377" y="402" class="value">R3 · 4,7 кОм</text>
+    <path d="M441 397H463" class="wire ground"/>
+    <text x="475" y="403" class="small">на минус</text>
+    <rect x="606" y="382" width="135" height="30" rx="5" class="capacitor"/>
+    <text x="674" y="402" class="value">C3 · 100 нФ</text>
+    <path d="M741 397H763" class="wire ground"/>
+    <text x="775" y="403" class="small">на минус</text>
+    <text x="927" y="369" class="label amber">PA3 · кнопка</text>
+  </g>
+  <g id="ground">
+    <text x="60" y="451" class="label">J4 №2</text>
+    <path d="M200 445H902" class="wire ground"/>
+    <text x="219" y="471" class="small">К этой жиле припаяйте все пять выводов, подписанных «на минус».</text>
+    <text x="927" y="451" class="label">Общий минус</text>
+  </g>
+
+  <rect x="34" y="512" width="1132" height="343" rx="16" class="panel"/>
+  <text x="60" y="550" class="heading">В ручке</text>
+  <text x="1140" y="550" class="small" text-anchor="end">Питание разветвите на R4 и A · конец жилы минуса изолируйте</text>
+  <path d="M58 568H1142 M601 588V833" stroke="#e1e9ed"/>
+  <g id="push-button">
+    <text x="60" y="605" class="label">Кнопка «ехать»</text>
+    <text x="60" y="640" class="small red">Питание пульта</text>
+    <text x="568" y="640" class="small amber" text-anchor="end">PA3 · кнопка</text>
+    <rect x="293" y="683" width="269" height="126" rx="14" class="hardware"/>
+    <path d="M63 655H357V714" class="wire power"/>
+    <rect x="179" y="639" width="137" height="32" rx="5" class="resistor"/>
+    <text x="247" y="661" class="value">R4 · 4,7 кОм</text>
+    <path d="M568 655H499V714" class="wire go"/>
+    <circle cx="357" cy="714" r="6" class="terminal power"/>
+    <circle cx="499" cy="714" r="6" class="terminal go"/>
+    <path d="M366 712 470 691" class="wire ground"/>
+    <text x="357" y="742" class="value">NO 1</text>
+    <text x="499" y="742" class="value">NO 2</text>
+    <circle cx="358" cy="767" r="5" class="unused"/>
+    <circle cx="499" cy="767" r="5" class="unused"/>
+    <text x="358" y="790" class="value">LED+</text>
+    <text x="499" y="790" class="value">LED−</text>
+    <text x="60" y="712" class="small">При нажатии</text>
+    <text x="60" y="734" class="small">NO замыкаются.</text>
+    <text x="60" y="774" class="small">LED+ и LED−</text>
+    <text x="60" y="796" class="small">без проводов.</text>
+    <text x="60" y="836" class="small">Контакты показаны условно. Найдите пару NO прозвонкой.</text>
+  </g>
+  <g id="potentiometer">
+    <text x="628" y="605" class="label">Потенциометр скорости</text>
+    <text x="628" y="640" class="small red">Питание пульта</text>
+    <rect x="708" y="683" width="332" height="68" rx="14" class="hardware"/>
+    <path d="M632 655H753V683" class="wire power"/>
+    <path d="M864 744V775H975V744 M975 775H1140" class="wire speed"/>
+    <circle cx="753" cy="683" r="6" class="terminal power"/>
+    <circle cx="864" cy="744" r="6" class="terminal speed"/>
+    <circle cx="975" cy="744" r="6" class="terminal speed"/>
+    <circle cx="975" cy="775" r="6" class="blue"/>
+    <text x="753" y="714" class="value">A · крайний</text>
+    <text x="864" y="714" class="value">B · движок</text>
+    <text x="975" y="714" class="value">C · крайний</text>
+    <text x="1140" y="802" class="small blue" text-anchor="end">PA2 · скорость</text>
+    <text x="628" y="836" class="small">На положении «минимум» между A и B+C ≈10 кОм.</text>
+  </g>
+  <text x="36" y="891" class="small">* До пайки подтвердите около +3,2 В между J4 №4 и №2, а также найдите PA2 и PA3 на штатном шлейфе YK99.</text>
+  <text x="36" y="923" class="small">Паяйте и прозванивайте с отключёнными аккумулятором, зарядкой и USB. Каждый стык закройте термоусадкой.</text>
+</svg>
